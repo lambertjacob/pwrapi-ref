@@ -1,10 +1,9 @@
 orig_CFLAGS="$CFLAGS"
 
-AC_INIT([pwrapi], [1.0.1])
+AC_INIT([pwrapi],[1.0.1])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([config])
 AM_INIT_AUTOMAKE([subdir-objects])
-
 
 AC_CONFIG_HEADERS([src/pwr_config.h])
 AM_MAINTAINER_MODE
@@ -20,7 +19,7 @@ if test -z "$orig_CFLAGS"; then
 fi
 
 AC_PROG_INSTALL
-AC_PROG_LIBTOOL
+LT_INIT
 AC_PROG_MKDIR_P
 AC_PROG_LN_S
 

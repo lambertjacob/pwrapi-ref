@@ -28,7 +28,7 @@ AC_DEFUN([PWRAPI_CHECK_POWERINSIGHT], [
         )
 
         AC_LANG_SAVE
-        AC_LANG_CPLUSPLUS
+        AC_LANG([C++])
 
         AC_CHECK_HEADERS([pidev.h], [], [pwrapi_check_powerinsight_happy="no"])
         AC_LINK_IFELSE([AC_LANG_PROGRAM([], [

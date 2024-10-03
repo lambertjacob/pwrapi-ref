@@ -29,7 +29,7 @@ AC_DEFUN([PWRAPI_CHECK_HWLOC], [
 	)
 
 	AC_LANG_SAVE
-	AC_LANG_CPLUSPLUS
+	AC_LANG([C++])
 
 	AC_CHECK_HEADERS([hwloc.h], [], [pwrapi_check_hwloc_happy="no"])
 	AC_LINK_IFELSE([AC_LANG_PROGRAM([], [
