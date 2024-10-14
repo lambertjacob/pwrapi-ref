@@ -11,25 +11,25 @@
 extern "C" {
 #endif
 
-plugin_devops_t *pwr_powermetrics_init(const char *initstr);
-int pwr_powermetrics_final(plugin_devops_t *dev);
+plugin_devops_t *powermetrics_init(const char *initstr);
+int powermetrics_final(plugin_devops_t *dev);
 
-pwr_fd_t pwr_powermetrics_open(plugin_devops_t *dev, const char *openstr);
-int pwr_powermetrics_close(pwr_fd_t fd);
+pwr_fd_t powermetrics_open(plugin_devops_t *dev, const char *openstr);
+int powermetrics_close(pwr_fd_t fd);
 
-int pwr_powermetrics_read(pwr_fd_t fd, PWR_AttrName attr, void *value,
+int powermetrics_read(pwr_fd_t fd, PWR_AttrName attr, void *value,
                     unsigned int len, PWR_Time *timestamp);
-int pwr_powermetrics_write(pwr_fd_t fd, PWR_AttrName attr, void *value,
+int powermetrics_write(pwr_fd_t fd, PWR_AttrName attr, void *value,
                      unsigned int len);
 
-int pwr_powermetrics_readv(pwr_fd_t fd, unsigned int arraysize,
+int powermetrics_readv(pwr_fd_t fd, unsigned int arraysize,
                      const PWR_AttrName attrs[], void *values,
                      PWR_Time timestamp[], int status[]);
-int pwr_powermetrics_writev(pwr_fd_t fd, unsigned int arraysize,
+int powermetrics_writev(pwr_fd_t fd, unsigned int arraysize,
                       const PWR_AttrName attrs[], void *values, int status[]);
 
-int pwr_powermetrics_time(pwr_fd_t fd, PWR_Time *timestamp);
-int pwr_powermetrics_clear(pwr_fd_t fd);
+int powermetrics_time(pwr_fd_t fd, PWR_Time *timestamp);
+int powermetrics_clear(pwr_fd_t fd);
 
 #ifdef __cplusplus
 }
