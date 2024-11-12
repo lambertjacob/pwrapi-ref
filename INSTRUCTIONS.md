@@ -21,3 +21,9 @@ Run the following command, adjusting to your system requirements:
 ```
 
 If it doesn't work, try setting the environment variable `CC` to `g++-14`. This bypasses Apple Clang.
+
+In the CAC Environment, ensure the following dependencies are loaded through the `module` interface:
+- Python 2.7
+- GCC 11.*
+
+When compiling the source code, ensure the `CXXFLAGS="-fpermissive"` flag is set to avoid compilation errors related to static method declarations.
