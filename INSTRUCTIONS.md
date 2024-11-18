@@ -26,4 +26,6 @@ In the CAC Environment, ensure the following dependencies are loaded through the
 - Python 2.7
 - GCC 11.*
 
+Command to get into the node from the login node: `salloc --qos=privileged --partition=reserved -w cac071`
+
 When compiling the source code, ensure the `CXXFLAGS="-fpermissive"` flag is set to avoid compilation errors related to static method declarations.
