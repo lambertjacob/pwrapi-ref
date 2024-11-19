@@ -90,7 +90,7 @@ bool PythonConfig::hasObject( const std::string name )
 	PyObject* pArgs = PyTuple_New( 1 );
 	assert(pArgs);
 
-	PyTuple_SetItem( pArgs, 0, PyInt_FromLong( 0 ) );
+	PyTuple_SetItem( pArgs, 0, PyLong_FromLong( 0 ) );
 	
 	// new referenc
 	PyObject* pRetval = PyObject_CallObject( pFunc, pArgs );
@@ -116,12 +116,12 @@ PWR_ObjType PythonConfig::objType( const std::string name )
 	PyObject* pArgs = PyTuple_New( 1 );
 	assert(pArgs);
 
-	PyTuple_SetItem( pArgs, 0, PyString_FromString( name.c_str() ) );
+	PyTuple_SetItem( pArgs, 0, PyUnicode_FromString( name.c_str() ) );
 
 	PyObject* pRetval = PyObject_CallObject( pFunc, pArgs );
 
 	if ( pRetval ) {
-		type = objTypeStrToInt( PyString_AsString(pRetval) );
+		type = objTypeStrToInt( PyBytes_AsString(pRetval) );
 		Py_DECREF(pRetval);
 	}
 	DBGX2(DBG_CONFIG,"obj=`%s` type=%s\n",
@@ -152,8 +152,8 @@ std::deque< Config::Plugin > PythonConfig::findPlugins( )
 
 		assert( 2 == PyList_Size(tmp ) );
 		Config::Plugin plugin;
-		plugin.name = PyString_AsString(PyList_GetItem(tmp,0) );
-		plugin.lib = PyString_AsString(PyList_GetItem(tmp,1) );
+		plugin.name = PyBytes_AsString(PyList_GetItem(tmp,0) );
+		plugin.lib = PyBytes_AsString(PyList_GetItem(tmp,1) );
 		DBGX2(DBG_CONFIG,"%s %s \n", plugin.name.c_str(), plugin.lib.c_str() );
 
 		Py_DECREF( tmp );
@@ -184,9 +184,9 @@ std::deque< Config::SysDev > PythonConfig::findSysDevs()
 
 		assert( 3 == PyList_Size(tmp ) );
 		Config::SysDev tmp2;
-		tmp2.name = PyString_AsString(PyList_GetItem(tmp,0) );
-		tmp2.plugin = PyString_AsString(PyList_GetItem(tmp,1) );
-		tmp2.initString = PyString_AsString(PyList_GetItem(tmp,2) );
+		tmp2.name = PyBytes_AsString(PyList_GetItem(tmp,0) );
+		tmp2.plugin = PyBytes_AsString(PyList_GetItem(tmp,1) );
+		tmp2.initString = PyBytes_AsString(PyList_GetItem(tmp,2) );
 		DBGX2(DBG_CONFIG,"%s %s %s\n", tmp2.name.c_str(), 
 			tmp2.plugin.c_str(), tmp2.initString.c_str() );
 
@@ -214,10 +214,10 @@ std::deque< Config::ObjDev >
 	PyObject* pArgs = PyTuple_New( 2 );
 	assert(pArgs);
 
-	PyTuple_SetItem( pArgs, 0, PyString_FromString( name.c_str() ) );
+	PyTuple_SetItem( pArgs, 0, PyUnicode_FromString( name.c_str() ) );
 
 	PyTuple_SetItem( pArgs, 1, 
-				PyString_FromString( attrNameToString(attr).c_str() ) );
+				PyUnicode_FromString( attrNameToString(attr).c_str() ) );
 	
 	PyObject* pRetval = PyObject_CallObject( pFunc, pArgs );
 	assert(pRetval);
@@ -230,8 +230,8 @@ std::deque< Config::ObjDev >
 
 		assert( 2 == PyList_Size(tmp ) );
 		Config::ObjDev dev;
-		dev.device = PyString_AsString(PyList_GetItem(tmp,0) );
-		dev.openString = PyString_AsString(PyList_GetItem(tmp,1) );
+		dev.device = PyBytes_AsString(PyList_GetItem(tmp,0) );
+		dev.openString = PyBytes_AsString(PyList_GetItem(tmp,1) );
 		DBGX2(DBG_CONFIG,"%s %s \n", dev.device.c_str(),
 										dev.openString.c_str() );
 
@@ -261,16 +261,16 @@ std::deque< std::string >
 	PyObject* pArgs = PyTuple_New( 2 );
 	assert(pArgs);
 
-	PyTuple_SetItem( pArgs, 0, PyString_FromString( name.c_str() ) );
+	PyTuple_SetItem( pArgs, 0, PyUnicode_FromString( name.c_str() ) );
 
 	PyTuple_SetItem( pArgs, 1, 
-			PyString_FromString( attrNameToString(attr).c_str() ) );
+			PyUnicode_FromString( attrNameToString(attr).c_str() ) );
 	
 	PyObject* pRetval = PyObject_CallObject( pFunc, pArgs );
 	assert(pRetval);
 
 	for ( int i=0; i < PyList_Size(pRetval); i++ ) {
-		char* str = PyString_AsString(PyList_GetItem(pRetval,i) );
+		char* str = PyBytes_AsString(PyList_GetItem(pRetval,i) );
 		DBGX2(DBG_CONFIG,"%s \n", str );
 		children.push_back( str ); 
 	}
@@ -295,15 +295,15 @@ std::string PythonConfig::findAttrType( std::string name, PWR_AttrName attr )
 	PyObject* pArgs = PyTuple_New( 2 );
 	assert(pArgs);
 
-	PyTuple_SetItem( pArgs, 0, PyString_FromString( name.c_str() ) );
+	PyTuple_SetItem( pArgs, 0, PyUnicode_FromString( name.c_str() ) );
 
 	PyTuple_SetItem( pArgs, 1, 
-				PyString_FromString( attrNameToString(attr).c_str() ) );
+				PyUnicode_FromString( attrNameToString(attr).c_str() ) );
 	
 	PyObject* pRetval = PyObject_CallObject( pFunc, pArgs );
 	assert(pRetval);
 
-	retval = PyString_AsString(pRetval );
+	retval = PyBytes_AsString(pRetval );
 
 	DBGX2(DBG_CONFIG,"'%s'\n", retval.c_str() );
 
@@ -329,17 +329,17 @@ std::string PythonConfig::findAttrOp( std::string name, PWR_AttrName attr )
 	assert(pArgs);
 
 	// steals 
-	PyTuple_SetItem( pArgs, 0, PyString_FromString( name.c_str() ) );
+	PyTuple_SetItem( pArgs, 0, PyUnicode_FromString( name.c_str() ) );
 
 	// steals 
 	PyTuple_SetItem( pArgs, 1, 
-			PyString_FromString( attrNameToString(attr).c_str() ) );
+			PyUnicode_FromString( attrNameToString(attr).c_str() ) );
 
 	// new	
 	PyObject* pRetval = PyObject_CallObject( pFunc, pArgs );
 	assert(pRetval);
 
-	retval = PyString_AsString( pRetval );
+	retval = PyBytes_AsString( pRetval );
 
 	DBGX2(DBG_CONFIG,"obj=`%s` attr=`%s` op=`%s`\n",
 				name.c_str(),attrNameToString(attr).c_str(), retval.c_str() );
@@ -366,17 +366,17 @@ std::string PythonConfig::findAttrHz( std::string name, PWR_AttrName attr )
 	assert(pArgs);
 
 	// steals 
-	PyTuple_SetItem( pArgs, 0, PyString_FromString( name.c_str() ) );
+	PyTuple_SetItem( pArgs, 0, PyUnicode_FromString( name.c_str() ) );
 
 	// steals 
 	PyTuple_SetItem( pArgs, 1, 
-			PyString_FromString( attrNameToString(attr).c_str() ) );
+			PyUnicode_FromString( attrNameToString(attr).c_str() ) );
 
 	// new	
 	PyObject* pRetval = PyObject_CallObject( pFunc, pArgs );
 	assert(pRetval);
 
-	retval = PyString_AsString( pRetval );
+	retval = PyBytes_AsString( pRetval );
 
 	DBGX2(DBG_CONFIG,"obj=`%s` attr=`%s` op=`%s`\n",
 				name.c_str(),attrNameToString(attr).c_str(), retval.c_str() );
@@ -401,13 +401,13 @@ std::deque< std::string > PythonConfig::findChildren( std::string name )
 	PyObject* pArgs = PyTuple_New( 1 );
 	assert(pArgs);
 
-	PyTuple_SetItem( pArgs, 0, PyString_FromString( name.c_str() ) );
+	PyTuple_SetItem( pArgs, 0, PyUnicode_FromString( name.c_str() ) );
 	
 	PyObject* pRetval = PyObject_CallObject( pFunc, pArgs );
 	assert(pRetval);
 
 	for ( int i=0; i < PyList_Size( pRetval); i++ ) {
-		char* str = PyString_AsString(PyList_GetItem(pRetval,i) );
+		char* str = PyBytes_AsString(PyList_GetItem(pRetval,i) );
 		DBGX2(DBG_CONFIG,"%s \n", str );
 		children.push_back( str ); 
 	}
@@ -432,12 +432,12 @@ std::string PythonConfig::findParent( std::string name )
 	PyObject* pArgs = PyTuple_New( 1 );
 	assert(pArgs);
 
-	PyTuple_SetItem( pArgs, 0, PyString_FromString( name.c_str() ) );
+	PyTuple_SetItem( pArgs, 0, PyUnicode_FromString( name.c_str() ) );
 	
 	PyObject* pRetval = PyObject_CallObject( pFunc, pArgs );
 
 	if ( pRetval ) {
-		retval = PyString_AsString(pRetval);
+		retval = PyBytes_AsString(pRetval);
 		Py_DECREF( pRetval );
 	}
 	DBGX2(DBG_CONFIG,"%s\n", retval.c_str() );
@@ -460,12 +460,12 @@ std::string PythonConfig::findObjLocation( std::string name )
 	PyObject* pArgs = PyTuple_New( 1 );
 	assert(pArgs);
 
-	PyTuple_SetItem( pArgs, 0,  PyString_FromString( name.c_str() ) );
+	PyTuple_SetItem( pArgs, 0,  PyUnicode_FromString( name.c_str() ) );
 	
 	PyObject* pRetval = PyObject_CallObject( pFunc, pArgs );
 
 	if ( pRetval ) {
-		retval = PyString_AsString(pRetval);
+		retval = PyBytes_AsString(pRetval);
 		Py_DECREF( pRetval );
 	}
 	DBGX2(DBG_CONFIG,"%s\n", retval.c_str() );
