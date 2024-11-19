@@ -19,8 +19,8 @@ libpwr_la_LIBADD += $(HWLOC_LIBS)
 endif
 
 if HAVE_PYTHON
-include_HEADERS += pyConfig.h
-libpwr_la_SOURCES += pyConfig.cc
+include_HEADERS += pythonConfig.h
+libpwr_la_SOURCES += pythonConfig.cc
 libpwr_la_LDFLAGS += $(PYTHON_LDFLAGS) 
 libpwr_la_CPPFLAGS += $(PYTHON_CPPFLAGS)
 endif
