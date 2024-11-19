@@ -1,7 +1,8 @@
 **/*.o
 **/*.lo
 **/*.la
-**/Makefile*
+**/Makefile
+**/Makefile.in
 
 **/.deps
 **/.dirstamp
@@ -38,6 +39,8 @@ src/pwr_config.h
 src/pwr_config.h.in
 src/pwr_config.h.in~
 src/stamp-h1
+src/bindings/python/pwr.py
+src/bindings/python/pwr_swig.cpp.py
 test/compliance
 tools/pwrapi
 tools/pwrdaemon/pwrdaemon
