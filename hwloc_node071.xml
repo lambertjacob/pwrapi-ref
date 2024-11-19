@@ -3,6 +3,16 @@
     <Devices/>
     <Objects>
         <obj name="plat" type="Platform">
+            <children>
+                <child name="node0"/>
+            </children>
+        </obj>
+        <obj name="plat.node0" type="Node">
+            <children>
+                <child name="core0"/>
+            </children>
+        </obj>
+        <obj name="plat.node0.core0" type="Core">
             <children/>
         </obj>
     </Objects>
