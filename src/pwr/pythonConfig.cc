@@ -9,7 +9,7 @@
  * distribution.
 */
 
-#include "pyConfig.h"
+#include "pythonConfig.h"
 
 #include <assert.h>
 
@@ -17,11 +17,11 @@
 
 using namespace PowerAPI;
 
-PyObject* PyConfig::m_pModule = NULL;
+PyObject* PythonConfig::m_pModule = NULL;
 
-pthread_mutex_t PyConfig::m_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t PythonConfig::m_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-PyConfig::PyConfig( std::string file ) 
+PythonConfig::PythonConfig( std::string file ) 
 {
 	DBGX2(DBG_CONFIG,"config file `%s`\n",file.c_str());
 
@@ -51,7 +51,7 @@ PyConfig::PyConfig( std::string file )
 	unlock();
 }
 
-PyConfig::~PyConfig()
+PythonConfig::~PythonConfig()
 {
 	lock();
 #if 0
@@ -66,18 +66,18 @@ Exception KeyError: KeyError(46912551089920,) in <module 'threading' from '/usr/
 	unlock();
 }
 
-void PyConfig::print( std::ostream& out  )
+void PythonConfig::print( std::ostream& out  )
 {
 }
 
-bool PyConfig::hasServer( const std::string name ) 
+bool PythonConfig::hasServer( const std::string name ) 
 {
 	DBGX2(DBG_CONFIG,"find %s\n",name.c_str());
 
 	return ! findObjLocation( name ).empty();
 }
 
-bool PyConfig::hasObject( const std::string name ) 
+bool PythonConfig::hasObject( const std::string name ) 
 {
 	DBGX2(DBG_CONFIG,"find %s\n",name.c_str());
 
@@ -103,7 +103,7 @@ bool PyConfig::hasObject( const std::string name )
 	assert(0);
 }
 
-PWR_ObjType PyConfig::objType( const std::string name )
+PWR_ObjType PythonConfig::objType( const std::string name )
 {
 	DBGX2(DBG_CONFIG,"%s\n",name.c_str());
 
@@ -134,7 +134,7 @@ PWR_ObjType PyConfig::objType( const std::string name )
 	return type;
 }
 
-std::deque< Config::Plugin > PyConfig::findPlugins( )
+std::deque< Config::Plugin > PythonConfig::findPlugins( )
 {
 	DBGX2(DBG_CONFIG,"\n");
 	std::deque< Config::Plugin > retval;
@@ -166,7 +166,7 @@ std::deque< Config::Plugin > PyConfig::findPlugins( )
 	return retval;
 }
 
-std::deque< Config::SysDev > PyConfig::findSysDevs()
+std::deque< Config::SysDev > PythonConfig::findSysDevs()
 {
 	DBGX2(DBG_CONFIG,"\n");
 	std::deque< Config::SysDev > retval;
@@ -201,7 +201,7 @@ std::deque< Config::SysDev > PyConfig::findSysDevs()
 }
 
 std::deque< Config::ObjDev > 
-			PyConfig::findObjDevs( std::string name, PWR_AttrName attr )
+			PythonConfig::findObjDevs( std::string name, PWR_AttrName attr )
 {
 	std::deque< Config::ObjDev > devs;
 	DBGX2(DBG_CONFIG,"obj=`%s` attr=`%s`\n",
@@ -248,7 +248,7 @@ std::deque< Config::ObjDev >
 }
 
 std::deque< std::string >
-        PyConfig::findAttrChildren( std::string name, PWR_AttrName attr )
+        PythonConfig::findAttrChildren( std::string name, PWR_AttrName attr )
 {
 	std::deque< std::string > children;
 	DBGX2(DBG_CONFIG,"obj=`%s` attr=`%s`\n",
@@ -282,7 +282,7 @@ std::deque< std::string >
 	return children;
 }
 
-std::string PyConfig::findAttrType( std::string name, PWR_AttrName attr )
+std::string PythonConfig::findAttrType( std::string name, PWR_AttrName attr )
 {
 	std::string retval;
 	DBGX2(DBG_CONFIG,"obj=`%s` attr=`%s`\n",
@@ -315,7 +315,7 @@ std::string PyConfig::findAttrType( std::string name, PWR_AttrName attr )
 	return retval;
 }
 
-std::string PyConfig::findAttrOp( std::string name, PWR_AttrName attr )
+std::string PythonConfig::findAttrOp( std::string name, PWR_AttrName attr )
 {
 	std::string retval;
 
@@ -352,7 +352,7 @@ std::string PyConfig::findAttrOp( std::string name, PWR_AttrName attr )
 	return retval;
 }
 
-std::string PyConfig::findAttrHz( std::string name, PWR_AttrName attr )
+std::string PythonConfig::findAttrHz( std::string name, PWR_AttrName attr )
 {
 	std::string retval;
 
@@ -389,7 +389,7 @@ std::string PyConfig::findAttrHz( std::string name, PWR_AttrName attr )
 	return retval;
 }
 
-std::deque< std::string > PyConfig::findChildren( std::string name )
+std::deque< std::string > PythonConfig::findChildren( std::string name )
 {
 	DBGX2(DBG_CONFIG,"%s\n",name.c_str());
 	std::deque< std::string > children;
@@ -420,7 +420,7 @@ std::deque< std::string > PyConfig::findChildren( std::string name )
 	return children;
 }
 
-std::string PyConfig::findParent( std::string name )
+std::string PythonConfig::findParent( std::string name )
 {
 	DBGX2(DBG_CONFIG,"%s\n",name.c_str());
 	std::string retval;
@@ -448,7 +448,7 @@ std::string PyConfig::findParent( std::string name )
 	return retval;
 }
 
-std::string PyConfig::findObjLocation( std::string name )
+std::string PythonConfig::findObjLocation( std::string name )
 {
 	DBGX2(DBG_CONFIG,"%s\n",name.c_str());
 	std::string retval;
@@ -476,7 +476,7 @@ std::string PyConfig::findObjLocation( std::string name )
 	return retval;
 }
 
-std::string PyConfig::objTypeToString( PWR_ObjType type )
+std::string PythonConfig::objTypeToString( PWR_ObjType type )
 {
     switch( type ) {
     case PWR_OBJ_PLATFORM: return "Platform";
@@ -493,7 +493,7 @@ std::string PyConfig::objTypeToString( PWR_ObjType type )
     return NULL;
 }
 
-PWR_ObjType PyConfig::objTypeStrToInt( const std::string name )
+PWR_ObjType PythonConfig::objTypeStrToInt( const std::string name )
 {
     if ( 0 == name.compare( "Platform" ) ) {
         return  PWR_OBJ_PLATFORM;
@@ -519,7 +519,7 @@ PWR_ObjType PyConfig::objTypeStrToInt( const std::string name )
     return PWR_OBJ_INVALID;
 }
 
-std::string PyConfig::attrNameToString( PWR_AttrName name )
+std::string PythonConfig::attrNameToString( PWR_AttrName name )
 {
     switch( name ){
     case PWR_ATTR_PSTATE: return "PSTATE";

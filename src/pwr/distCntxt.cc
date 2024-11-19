@@ -12,7 +12,7 @@
 #include "pwr_config.h"
 
 #if HAVE_PYTHON
-#include "pyConfig.h"
+#include "pythonConfig.h"
 #endif
 #if HAVE_HWLOC
 #include "hwlocConfig.h"
@@ -86,7 +86,7 @@ DistCntxt::DistCntxt( PWR_CntxtType type, PWR_Role role, const char* name ) :
         m_config = new XmlConfig( configFile );
 #if HAVE_PYTHON
     } else if ( 0 == configFile.compare(pos,3,".py") ) {
-        m_config = new PyConfig( configFile );
+        m_config = new PythonConfig( configFile );
 #endif
 #if HAVE_HWLOC
     } else if ( 0 == configFile.compare(pos,6,".hwloc") ) {
