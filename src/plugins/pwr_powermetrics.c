@@ -60,15 +60,15 @@ typedef struct {
   pwr_metrics_data_t *data;
 } pwr_metrics_fd_t;
 #define PWR_METFD(X) ((pwr_metrics_fd_t *)(X))
-static double getTime() {
+double getTime() {
   struct timeval tv;
   gettimeofday(&tv, NULL);
   return (tv.tv_sec * 1000000000) + (tv.tv_usec * 1000);
 }
 
-static double getTimeSec() { return getTime() / 1000000000.0; }
+double getTimeSec() { return getTime() / 1000000000.0; }
 
-static plugin_devops_t devOps = {.open = powermetrics_open,
+plugin_devops_t devOps = {.open = powermetrics_open,
                                  .close = powermetrics_close,
                                  .read = powermetrics_read,
                                  .write = powermetrics_write,
@@ -77,7 +77,7 @@ static plugin_devops_t devOps = {.open = powermetrics_open,
                                  .time = powermetrics_time,
                                  .clear = powermetrics_clear};
 
-static plugin_dev_t dev = {
+plugin_dev_t dev = {
     .init = powermetrics_init,
     .final = powermetrics_final,
 };
@@ -105,9 +105,11 @@ plugin_devops_t *powermetrics_init(const char *initstr) {
     // Close both ends of the pipe, since we don't need them.
     close(link[0]);
     close(link[1]);
+    // Added info to max out the flags possible.
     int succ = execlp("/usr/bin/powermetrics", "powermetrics", "--samplers",
-                      "cpu_power", "thermal", "--hide-cpu-duty-cycle", "-i1",
-                      (char *)NULL);
+                      "cpu_power", "--samplers", "smc", "--samplers",
+                      "io_throttle_ssd", "--show-pstates", "--show-plimits",
+                      "--hide-cpu-duty-cycle", "-i1", (char *)NULL);
     assert(succ != -1);
   } else {
     // Close the input end of the pipe.
@@ -272,7 +274,6 @@ int _read_node_data(int link, pwr_metrics_node_t *tmp) {
 int powermetrics_read(pwr_fd_t fd, PWR_AttrName type, void *val,
                       unsigned int len, PWR_Time *ts) {
   pwr_metrics_fd_t *info = PWR_METFD(fd);
-  struct timeval tv;
   double cstates = 0;
   if (info->type == PWRMETRICS_NODE_MODE) {
     pwr_metrics_node_t *node = PWR_METNODE(info->obj);
@@ -360,7 +361,7 @@ plugin_dev_t *getDev() { return &dev; }
 /**
  * The plugin name.
  */
-static int powermetrics_getPluginName(size_t len, char *buf) {
+int powermetrics_getPluginName(size_t len, char *buf) {
   strncpy(buf, "PowerMetrics", len);
   return 0;
 }
@@ -368,7 +369,7 @@ static int powermetrics_getPluginName(size_t len, char *buf) {
 /**
  * The supported objects.
  */
-static int powermetrics_readObjs(int i, PWR_ObjType *ptr) {
+int powermetrics_readObjs(int i, PWR_ObjType *ptr) {
   DBGP("\n");
   ptr[0] = PWR_OBJ_NODE;
   ptr[1] = PWR_OBJ_CORE;
@@ -380,7 +381,7 @@ static int powermetrics_readObjs(int i, PWR_ObjType *ptr) {
  *
  * This is the length of the array passed to powermetrics_readObjs.
  */
-static int powermetrics_numObjs() {
+int powermetrics_numObjs() {
   DBGP("\n");
   return 2;
 }
@@ -388,7 +389,7 @@ static int powermetrics_numObjs() {
 /**
  * The supported attributes.
  */
-static int powermetrics_readAttrs(PWR_ObjType type, int i, PWR_AttrName *ptr) {
+int powermetrics_readAttrs(PWR_ObjType type, int i, PWR_AttrName *ptr) {
   DBGP("\n");
   ptr[0] = PWR_ATTR_CSTATE;
   ptr[1] = PWR_ATTR_POWER;
@@ -401,7 +402,7 @@ static int powermetrics_readAttrs(PWR_ObjType type, int i, PWR_AttrName *ptr) {
  *
  * This is the length of the array passed to powermetrics_readAttrs.
  */
-static int powermetrics_numAttrs(PWR_ObjType type) {
+int powermetrics_numAttrs(PWR_ObjType type) {
   DBGP("\n");
   return 3;
 }
@@ -411,7 +412,7 @@ static int powermetrics_numAttrs(PWR_ObjType type) {
 /**
  * This is left as the default since we don't have multiple instances.
  */
-static int powermetrics_getDevName(PWR_ObjType type, size_t len, char *buf) {
+int powermetrics_getDevName(PWR_ObjType type, size_t len, char *buf) {
   strncpy(buf, "powermetrics", len);
   DBGP("type=%d name=`%s`\n", type, buf);
   return 0;
@@ -419,7 +420,7 @@ static int powermetrics_getDevName(PWR_ObjType type, size_t len, char *buf) {
 
 // Create the device initialized string for the specified dev. The name
 // was returned the the framework by powermetrics_getDevName()
-static int powermetrics_getDevInitStr(const char *devName, size_t len,
+int powermetrics_getDevInitStr(const char *devName, size_t len,
                                       char *buf) {
   strncpy(buf, "powermetrics", len);
   DBGP("dev=`%s` str=`%s`\n", devName, buf);
@@ -428,14 +429,14 @@ static int powermetrics_getDevInitStr(const char *devName, size_t len,
 
 // a device can be opened multiple times, get the info to pass to the
 // open call for this object type
-static int powermetrics_getDevOpenStr(PWR_ObjType type, int global_index,
+int powermetrics_getDevOpenStr(PWR_ObjType type, int global_index,
                                       size_t len, char *buf) {
   snprintf(buf, len, "%d %d", type, global_index);
   DBGP("type=%d global_index=%d str=`%s`\n", type, global_index, buf);
   return 0;
 }
 
-static plugin_meta_t meta = {
+plugin_meta_t meta = {
     .numObjs = powermetrics_numObjs,
     .readObjs = powermetrics_readObjs,
     .numAttrs = powermetrics_numAttrs,
