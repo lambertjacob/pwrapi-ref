@@ -1,0 +1,9 @@
+<System>
+    <Plugins/>
+    <Devices/>
+    <Objects>
+        <obj name="plat" type="Platform">
+            <children/>
+        </obj>
+    </Objects>
+</System>
