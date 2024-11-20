@@ -20,10 +20,10 @@
 
 namespace PowerAPI {
 
-class PyConfig : public Config {
+class PythonConfig : public Config {
   public:
-	PyConfig( std::string file );
-	~PyConfig();
+	PythonConfig( std::string file );
+	~PythonConfig();
 	
     std::string findParent( std::string name );
 	std::deque< std::string >

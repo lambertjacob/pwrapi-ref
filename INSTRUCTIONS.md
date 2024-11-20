@@ -7,7 +7,7 @@ In [.clangd](./.clangd), change the include directory to wherever you want to in
 
 ## Building Power API
 
-Install the following programs (using Homebrew if on MacOS):
+Install the following programs (using Homebrew if on MacOS or by loading the modules on the CAC machine):
 - automake
 - autoconf
 - openmpi
@@ -20,4 +20,4 @@ Run the following command, adjusting to your system requirements:
 ./configure --prefix="/Users/ethansilver/Code/elec498/pwrapi-ref/build/install" --with-hwloc="/usr/local/Cellar/hwloc/2.11.2" --with-mpi --enable-debug
 ```
 
-If it doesn't work, try setting the environment variable `CC` to `g++-14`. This bypasses Apple Clang.
+Use the following command to access node CAC071: `salloc --qos=privileged --partition=reserved -w cac071`
