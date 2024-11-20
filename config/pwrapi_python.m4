@@ -22,7 +22,7 @@ AC_DEFUN([PWRAPI_CHECK_PYTHON], [
   AS_IF([test -n "$with_python"],
         [PYTHON_LDFLAGS="-L$with_python/lib"],
         [AS_IF([test "$PYTHON_CONFIG_EXE" != "NOTFOUND"],
-                [PYTHON_LDFLAGS=`$PYTHON_CONFIG_EXE --ldflags`])])
+                [PYTHON_LDFLAGS=`$PYTHON_CONFIG_EXE --ldflags --embed`])])
 
   CPPFLAGS_saved="$CPPFLAGS"
   CPPFLAGS="$PYTHON_CPPFLAGS $CPPFLAGS"
