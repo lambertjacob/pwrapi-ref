@@ -3,6 +3,7 @@
 **/*.la
 **/Makefile
 **/Makefile.in
+.clangd
 
 **/.deps
 **/.dirstamp
