@@ -142,10 +142,10 @@ Data* runtimeInit( int *argc, char ***argv,
 		exit(-1);
 	} 
 	data->routeFile = routeFile.str();
-    PyTuple_SetItem( pArgs, 0, PyInt_FromLong( myNid ) );
-    PyTuple_SetItem( pArgs, 1, PyString_FromString( config ) );
-    PyTuple_SetItem( pArgs, 2, PyString_FromString( nidList.c_str() ) );
-    PyTuple_SetItem( pArgs, 3, PyString_FromString( routeFile.str().c_str() ) );
+    PyTuple_SetItem( pArgs, 0, PyLong_FromLong( myNid ) );
+    PyTuple_SetItem( pArgs, 1, PyUnicode_FromString( config ) );
+    PyTuple_SetItem( pArgs, 2, PyUnicode_FromString( nidList.c_str() ) );
+    PyTuple_SetItem( pArgs, 3, PyUnicode_FromString( routeFile.str().c_str() ) );
 
 	std::string object = "plat";
 	if ( getenv("POWERRT_OBJECT") ) { 
@@ -174,11 +174,11 @@ Data* runtimeInit( int *argc, char ***argv,
 		client = getenv("POWERRT_CLIENT");
 	}
 
-    PyTuple_SetItem( pArgs, 4, PyString_FromString( object.c_str() ) );
-    PyTuple_SetItem( pArgs, 5, PyString_FromString( attr.c_str() ) );
-    PyTuple_SetItem( pArgs, 6, PyString_FromString( logFile.c_str() ) );
-    PyTuple_SetItem( pArgs, 7, PyString_FromString( daemon.c_str() ) );
-    PyTuple_SetItem( pArgs, 8, PyString_FromString( client.c_str() ) );
+    PyTuple_SetItem( pArgs, 4, PyUnicode_FromString( object.c_str() ) );
+    PyTuple_SetItem( pArgs, 5, PyUnicode_FromString( attr.c_str() ) );
+    PyTuple_SetItem( pArgs, 6, PyUnicode_FromString( logFile.c_str() ) );
+    PyTuple_SetItem( pArgs, 7, PyUnicode_FromString( daemon.c_str() ) );
+    PyTuple_SetItem( pArgs, 8, PyUnicode_FromString( client.c_str() ) );
 
     PyObject* pRetval = PyObject_CallObject( pFunc, pArgs );
     assert(pRetval);
@@ -203,7 +203,7 @@ Data* runtimeInit( int *argc, char ***argv,
 		std::vector<char*> argv;
 		std::vector<std::string> args;
 		for ( int j=0; j < PyList_Size( pyArgs ); j++ ) {
-			std::string str =PyString_AsString( PyList_GetItem( pyArgs, j ) );
+			std::string str =PyBytes_AsString( PyList_GetItem( pyArgs, j ) );
         	args.push_back( str );
 		}
 
@@ -217,7 +217,7 @@ Data* runtimeInit( int *argc, char ***argv,
 
 		if ( pyEnv ) {
 			for ( int j=0; j < PyList_Size( pyEnv ); j++ ) {
-				std::string str =PyString_AsString( PyList_GetItem( pyEnv, j ) );
+				std::string str =PyBytes_AsString( PyList_GetItem( pyEnv, j ) );
         		envs.push_back( str );
 			}
 		}
