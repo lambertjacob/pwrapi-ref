@@ -57,6 +57,6 @@ Use the following command to access node CAC071:
 salloc --qos=privileged --partition=reserved -w cac071
 ```
 
-## Using and Editor
+## Using an Editor
 
 Since this project uses a lot of dynamic linking, editors get confused by the dependency tree. To account for this, install [Bear](github.com/rizsotto/Bear)
