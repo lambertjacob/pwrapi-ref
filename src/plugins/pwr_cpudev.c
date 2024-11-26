@@ -108,7 +108,7 @@ static int cpudev_avail_freq( int cpu, int freq[], int *count )
     int offset = 0;
 	int c;
 
-    sprintf( freqpath, "/sys/devices/system/cpu/cpu%i/cpufreq/cpuinfo_cur_freq", cpu );
+    sprintf( freqpath, "/sys/devices/system/cpu/intel_pstate/num_pstates");
 
     DBGP( "%s\n", freqpath );
 
