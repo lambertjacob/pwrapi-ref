@@ -10,11 +10,19 @@ Install the following programs (should be preloaded by StdEnv/2023):
 - hwloc
 - gcc
 
-Run the following command:
+To build PowerAPI and use it in Quicksilver, set the following environment variable:
 
 ```bash
-./configure --prefix="$(pwd)/build/install" --with-mpi --enable-debug
+export POWER_LOC="$(pwd)/build/install"
 ```
+
+Then run the configure command with that location for the install.
+
+```bash
+./configure --prefix="${POWER_LOC}" --with-mpi --enable-debug
+```
+
+## Accessing the CAC Node
 
 Use the following command to access node CAC071:
 
