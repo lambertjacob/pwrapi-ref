@@ -79,7 +79,7 @@ typedef enum {
     PWR_ATTR_POWER,           /* double, watts */
     PWR_ATTR_POWER_LIMIT_MIN, /* double, watts */
     PWR_ATTR_POWER_LIMIT_MAX, /* double, watts */
-    PWR_ATTR_FREQ,	          /* double, Hz */
+    PWR_ATTR_FREQ,	      /* double, Hz */
     PWR_ATTR_FREQ_LIMIT_MIN,  /* double, Hz */
     PWR_ATTR_FREQ_LIMIT_MAX,  /* double, Hz */
     PWR_ATTR_ENERGY,          /* double, joules */
