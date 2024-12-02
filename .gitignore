@@ -11,6 +11,7 @@
 .clangd
 .cache
 compile_commands.json
+.clangd
 
 aclocal.m4
 autom4te.cache/
