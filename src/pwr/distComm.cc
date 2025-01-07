@@ -21,7 +21,7 @@
 
 using namespace PowerAPI;
 
-static inline int gettid() {
+inline int gettid() {
 	return syscall(SYS_gettid);
 }
 
