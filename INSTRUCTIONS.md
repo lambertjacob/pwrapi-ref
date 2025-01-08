@@ -20,6 +20,11 @@ To build PowerAPI and use it in Quicksilver, set the following environment varia
 export POWER_LOC="$(pwd)/build/install"
 ```
 
+Run autogen:
+```bash
+./autogen.sh
+```
+
 Then run the configure command with that location for the install.
 
 ```bash
