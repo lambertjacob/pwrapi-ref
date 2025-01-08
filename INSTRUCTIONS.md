@@ -1,23 +1,42 @@
 # Instructions for Project Configuration
 
-This is a guide to configure this project.
-## Configuring the project
-
-In [.clangd](./.clangd), change the include directory to wherever you want to install Power API. Also do this in Quicksilver.
-
 ## Building Power API
 
-Install the following programs (using Homebrew if on MacOS or by loading the modules on the CAC machine):
+Install the following programs (should be preloaded by StdEnv/2023):
+
 - automake
 - autoconf
 - openmpi
 - hwloc
 - gcc
 
-Run the following command, adjusting to your system requirements:
+In the CAC Environment, ensure the following dependencies are loaded through the `module` interface:
+
+- Python 2.7
+- GCC 11.\*
+
+To build PowerAPI and use it in Quicksilver, set the following environment variable:
 
 ```bash
-./configure --prefix="/Users/ethansilver/Code/elec498/pwrapi-ref/build/install" --with-hwloc="/usr/local/Cellar/hwloc/2.11.2" --with-mpi --enable-debug
+export POWER_LOC="$(pwd)/build/install"
 ```
 
-Use the following command to access node CAC071: `salloc --qos=privileged --partition=reserved -w cac071`
+Then run the configure command with that location for the install.
+
+```bash
+./configure --prefix="${POWER_LOC}" --with-mpi --enable-debug
+```
+
+Then run the following command to compile the build folder:
+
+```bash
+make install
+```
+
+## Accessing the CAC Node
+
+Use the following command to access node CAC071:
+
+```bash
+salloc --qos=privileged --partition=reserved -w cac071
+```
