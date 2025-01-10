@@ -10,10 +10,14 @@ Install the following programs (should be preloaded by StdEnv/2023):
 - hwloc
 - gcc
 
-In the CAC Environment, ensure the following dependencies are loaded through the `module` interface:
+In the CAC Environment, ensure the correct Python version is loaded through the `module` interface:
 
-- Python 2.7
-- GCC 11.\*
+```bash
+module load StdEnv/2020
+module load python/2.7.18
+```
+
+**_This has been causing issues recently, I suggest installing python 2.7.18 locally instead._**
 
 To build PowerAPI and use it in Quicksilver, set the following environment variable:
 
@@ -22,6 +26,7 @@ export POWER_LOC="$(pwd)/build/install"
 ```
 
 Run autogen:
+
 ```bash
 ./autogen.sh
 ```
@@ -30,6 +35,12 @@ Then run the configure command with that location for the install.
 
 ```bash
 ./configure --prefix="${POWER_LOC}" --with-mpi --enable-debug
+```
+
+If using a local Python installation, make sure to point to it:
+
+```bash
+./configure --with-python=(Python install path)/bin/python2.7  --prefix="${POWER_LOC}" --with-mpi --enable-debug
 ```
 
 Then run the following command to compile the build folder:
