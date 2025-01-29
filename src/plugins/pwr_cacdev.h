@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
 plugin_devops_t *cac_init(const char *initstr);
+
 int cac_final(plugin_devops_t *dev);
 
 pwr_fd_t cac_open(plugin_devops_t *dev, const char *openstr);

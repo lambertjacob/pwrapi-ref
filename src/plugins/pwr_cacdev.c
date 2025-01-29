@@ -66,6 +66,10 @@ plugin_dev_t dev = {
     .final = cac_final,
 };
 
+plugin_dev_t* getDev() {
+    return &dev;
+}
+
 int _core_read(int cpu, const char *name, int64_t *val) {
   char path[256] = "";
   FILE *fd;
@@ -83,7 +87,7 @@ int _core_read(int cpu, const char *name, int64_t *val) {
   return PWR_RET_SUCCESS;
 }
 
-plugin_devops_t *pwr_cpudev_init(const char *initstr) {
+plugin_devops_t *cac_init(const char *initstr) {
   DBGP("initstr='%s'\n", initstr);
   plugin_devops_t *dev = (plugin_devops_t *)malloc(sizeof(plugin_devops_t));
   *dev = devops;
@@ -212,7 +216,9 @@ int cac_read(pwr_fd_t fd, PWR_AttrName attr, void *value, unsigned int len,
   return 0;
 }
 
-int cac_write(pwr_fd_t fd, PWR_AttrName attr, void *value, unsigned int len);
+int cac_write(pwr_fd_t fd, PWR_AttrName attr, void *value, unsigned int len) {
+  return 0;
+}
 
 static int cpudev_read(int cpu, const char *name, double *val) {
   char path[256] = "", strval[20] = "";

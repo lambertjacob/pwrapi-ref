@@ -1,0 +1,31 @@
+<System>
+    <Plugins/>
+    <Devices/>
+    <Objects>
+        <obj name="plat" type="Platform">
+            <children>
+                <child name="node0"/>
+            </children>
+        </obj>
+        <obj name="plat.node0" type="Node">
+            <children>
+                <child name="core0"/>
+                <child name="core1"/>
+                <child name="core2"/>
+                <child name="core3"/>
+            </children>
+        </obj>
+        <obj name="plat.node0.core0" type="Core">
+            <children/>
+        </obj>
+        <obj name="plat.node0.core1" type="Core">
+            <children/>
+        </obj>
+        <obj name="plat.node0.core2" type="Core">
+            <children/>
+        </obj>
+        <obj name="plat.node0.core3" type="Core">
+            <children/>
+        </obj>
+    </Objects>
+</System>
