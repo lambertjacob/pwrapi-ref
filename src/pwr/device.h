@@ -42,6 +42,7 @@ class Device {
       :  m_ops( ops )
     {
         DBGX("config=`%s`\n",config.c_str());
+        printf("Config=%s\n", config.c_str());
         m_fd = m_ops->open( ops, config.c_str() );
 		assert( m_fd );
     }
