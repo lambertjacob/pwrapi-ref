@@ -1,6 +1,7 @@
 # Instructions for Project Configuration
 
 ## Building Power API
+For default server config, just run `./compile.sh`
 
 Install the following programs (should be preloaded by StdEnv/2023):
 
