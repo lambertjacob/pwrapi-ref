@@ -59,6 +59,7 @@ plugin_devops_t devops = {
     .close = cac_close,
     .read = cac_read,
     .write = cac_write,
+    .private_data = 0x0,
 };
 
 plugin_dev_t dev = {
@@ -265,4 +266,79 @@ static int cpudev_write(int cpu, const char *name, double val) {
 
   close(fd);
   return 0;
+}
+
+static int pwr_cacdev_numObjs( )
+{
+    DBGP("\n");
+    return 1;
+}
+
+static int pwr_cacdev_readObjs(  int i, PWR_ObjType* ptr )
+{
+    DBGP("\n");
+    ptr[0] = PWR_OBJ_CORE;
+	return 0;
+}
+
+static int pwr_cacdev_numAttrs( PWR_ObjType type )
+{
+    DBGP("\n");
+    return 2;
+}
+
+static int pwr_cacdev_readAttrs( PWR_ObjType type, int i, PWR_AttrName* ptr )
+{
+    DBGP("\n");
+    ptr[0] = PWR_ATTR_SSTATE;
+    ptr[1] = PWR_ATTR_FREQ;
+// these are not supported
+//    ptr[] = PWR_ATTR_PSTATE;
+//    ptr[] = PWR_ATTR_CSTATE;
+//    ptr[] = PWR_ATTR_TEMP;
+    return 0;
+}
+
+static int pwr_cacdev_getDevName(PWR_ObjType type, size_t len, char* buf )
+{
+    strncpy(buf,"cpu_dev0", len );
+    DBGP("type=%d name=`%s`\n",type,buf);
+	return 0;
+}
+
+static int pwr_cacdev_getDevOpenStr(PWR_ObjType type,
+                        int global_index, size_t len, char* buf )
+{
+    snprintf( buf, len, "%d", global_index);
+    DBGP("type=%d global_index=%d str=`%s`\n",type,global_index,buf);
+	return 0;
+}
+
+static int pwr_cacdev_getDevInitStr( const char* name,
+                        size_t len, char* buf )
+{
+    strncpy(buf,"",len);
+    DBGP("dev=`%s` str=`%s`\n",name, buf );
+	return 0;
+}
+
+static int pwr_cacdev_getPluginName( size_t len, char* buf )
+{
+    strncpy(buf,"CPU",len);
+	return 0;
+}
+
+static plugin_meta_t meta = {
+    .numObjs = pwr_cacdev_numObjs,
+    .numAttrs = pwr_cacdev_numAttrs,
+    .readObjs = pwr_cacdev_readObjs,
+    .readAttrs = pwr_cacdev_readAttrs,
+    .getDevName = pwr_cacdev_getDevName,
+    .getDevOpenStr = pwr_cacdev_getDevOpenStr,
+    .getDevInitStr = pwr_cacdev_getDevInitStr,
+    .getPluginName = pwr_cacdev_getPluginName,
+};
+
+plugin_meta_t* getMeta() {
+    return &meta;
 }
