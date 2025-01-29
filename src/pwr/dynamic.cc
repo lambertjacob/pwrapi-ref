@@ -22,7 +22,7 @@ using namespace PowerAPI;
 plugin_dev_t* DistCntxt::getDev( std::string lib, std::string name )
 {
 	DBGX("lib %s name=`%s`\n", lib.c_str(), name.c_str() );
-    void* ptr = dlopen( lib.c_str(), RTLD_LAZY);
+    void* ptr = dlopen( lib.c_str(), RTLD_NOW);
     if ( NULL == ptr ) {
         printf("error: can't find plugin library `%s`\n", lib.c_str());
         exit(-1);
