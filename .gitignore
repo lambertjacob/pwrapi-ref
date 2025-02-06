@@ -8,6 +8,8 @@
 **/.libs
 
 .clangd
+.cache
+compile_commands.json
 
 aclocal.m4
 autom4te.cache/
