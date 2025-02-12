@@ -386,17 +386,17 @@ int PWR_AppHintStart(uint64_t *region_id) {
 
   switch (hint) {
     case PWR_REGION_SERIAL: {
-      //need to set for different cores???
+      return PWR_RET_SUCCESS;
+    }
+    case PWR_REGION_PARALLEL: {
+      //online_cpus(1);
+      //loop through all cores and set the frequency to max. 
       double *frequency;
-      *frequency = 3200.0;
+      *frequency = 3200000;
       uint8_t rc = PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, frequency);
       assert(PWR_RET_SUCCESS == rc);
       printf("PWR_ObjAttrSetValue(PWR_ATTR_FREQ) value=%f\n", *frequency);
       return PWR_RET_SUCCESS;
-    }
-    case PWR_REGION_PARALLEL: {
-      online_cpus(1);
-        return PWR_RET_SUCCESS;
 
     }
     case PWR_REGION_COMPUTE: {
@@ -412,6 +412,7 @@ int PWR_AppHintStart(uint64_t *region_id) {
         return PWR_RET_SUCCESS;
     }
     case PWR_REGION_MEM_BOUND: {
+        //add in here, slow all cores except 1. 
         return PWR_RET_SUCCESS;
     }
     case PWR_REGION_DEFAULT: {
