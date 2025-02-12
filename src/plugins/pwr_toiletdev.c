@@ -88,15 +88,50 @@ int toilet_final(plugin_devops_t *dev) {
 pwr_fd_t toilet_open(plugin_devops_t *dev, const char *openstr) {
   pwr_fd_t *fd = (pwr_fd_t *)malloc(sizeof(toilet_fd_t));
   bzero(fd, sizeof(toilet_fd_t));
+  char path[256] = "", strval[10] = "userspace";
+  int file;
   if (strstr(openstr, "pkg") != NULL) {
     toilet_FD(fd)->obj = malloc(sizeof(toilet_pkg_t));
     toilet_FD(fd)->type = 1;
     sscanf(openstr, "pkg%d", &(toilet_FD(fd))->num);
+  } else if (strstr(openstr, "core") != NULL) {
+    toilet_FD(fd)->obj = malloc(sizeof(toilet_core_t));
+    toilet_FD(fd)->type = 0;
+    sscanf(openstr, "core%d", &(toilet_FD(fd))->num);
+    snprintf(path, 255,
+             "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_governor",
+             toilet_FD(fd)->num);
+    file = open(path, O_WRONLY);
+    if (file < 0) {
+      DBGP("Error: unable to open CPU file at %s\n", path);
+      return PWR_RET_FAILURE;
+    }
+    DBGP("Writing attribute to file %s\n", path);
+    if (write(file, strval, 100) < 0) {
+      DBGP("Error: unable to write scaling_governor.\n");
+      close(file);
+      return PWR_RET_FAILURE;
+    }
   }
   return fd;
 }
 
 int toilet_close(pwr_fd_t fd) {
+  char path[256] = "", strval[10] = "schedutil";
+  int file;
+  snprintf(path, 255, "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_governor",
+           toilet_FD(fd)->num);
+  file = open(path, O_WRONLY);
+  if (file < 0) {
+    DBGP("Error: unable to open CPU file at %s\n", path);
+    return PWR_RET_FAILURE;
+  }
+  DBGP("Writing attribute to file %s\n", path);
+  if (write(file, strval, 100) < 0) {
+    DBGP("Error: unable to write scaling_governor.\n");
+    close(file);
+    return PWR_RET_FAILURE;
+  }
   free(fd);
   return PWR_RET_SUCCESS;
 }
@@ -106,45 +141,65 @@ int toilet_read(pwr_fd_t fd, PWR_AttrName attr, void *value, unsigned int len,
   struct timeval tv;
   char path[256] = "", strval[101] = "";
   int file;
-
   if (len != sizeof(int64_t)) {
-    DBGP("Error: value field size of %u incorrect, should be %ld\n",
-            len, sizeof(unsigned long long));
+    DBGP("Error: value field size of %u incorrect, should be %ld\n", len,
+         sizeof(unsigned long long));
     return PWR_RET_FAILURE;
   }
-
-  switch (attr) {
-  case PWR_ATTR_ENERGY: {
-    snprintf(
-        path, 255,
-        "/sys/devices/virtual/powercap/intel-rapl/intel-rapl\:%d/energy_uj",
-        toilet_FD(fd)->num);
-    file = open(path, O_RDONLY);
-    if (file < 0) {
-      DBGP("Error: unable to open CPU file at %s\n", path);
+  if (toilet_FD(fd)->type == 1) {
+    switch (attr) {
+    case PWR_ATTR_ENERGY: {
+      snprintf(
+          path, 255,
+          "/sys/devices/virtual/powercap/intel-rapl/intel-rapl\:%d/energy_uj",
+          toilet_FD(fd)->num);
+    } break;
+    default: {
+      DBGP("Error: Unrecognized power attribute.\n");
       return PWR_RET_FAILURE;
     }
-    DBGP("Reading energy from file %s\n", path);
-    if (read(file, strval, 100) < 0) {
-      DBGP("Error: unable to read PM counter.\n");
-      close(file);
+    }
+  } else {
+    switch (attr) {
+    case PWR_ATTR_FREQ: {
+      snprintf(path, 255,
+               "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_cur_freq",
+               toilet_FD(fd)->num);
+    } break;
+    case PWR_ATTR_FREQ_LIMIT_MAX: {
+      snprintf(path, 255,
+               "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq",
+               toilet_FD(fd)->num);
+    } break;
+    case PWR_ATTR_FREQ_LIMIT_MIN: {
+      snprintf(path, 255,
+               "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq",
+               toilet_FD(fd)->num);
+    } break;
+    default: {
+      DBGP("Error: Unrecognized power attribute.\n");
       return PWR_RET_FAILURE;
     }
-    sscanf(strval, "%llu", value);
+    }
+  }
+  file = open(path, O_RDONLY);
+  if (file < 0) {
+    DBGP("Error: unable to open CPU file at %s\n", path);
+    return PWR_RET_FAILURE;
+  }
+  DBGP("Reading attribute from file %s\n", path);
+  if (read(file, strval, 100) < 0) {
+    DBGP("Error: unable to read PM counter.\n");
     close(file);
-
-    gettimeofday(&tv, NULL);
-    *timestamp = tv.tv_sec * 1000000000ULL + tv.tv_usec * 1000;
-
-    DBGP("Info: reading of type %u at time %llu with value %lf\n", attr,
-         *(unsigned long long *)timestamp, (double *) value);
-
-    return PWR_RET_SUCCESS;
-  } break;
-  default:
-    fprintf(stderr, "Warning: unknown PWR reading attr (%u) requested\n", attr);
     return PWR_RET_FAILURE;
   }
+  sscanf(strval, "%llu", value);
+  close(file);
+  gettimeofday(&tv, NULL);
+  *timestamp = tv.tv_sec * 1000000000ULL + tv.tv_usec * 1000;
+  DBGP("Info: reading of type %u at time %llu with value %llu\n", attr,
+       *(unsigned long long *)timestamp, (uint64_t)&value);
+  return PWR_RET_SUCCESS;
 }
 
 int toilet_write(pwr_fd_t fd, PWR_AttrName attr, void *value, unsigned int len,
@@ -152,47 +207,65 @@ int toilet_write(pwr_fd_t fd, PWR_AttrName attr, void *value, unsigned int len,
   struct timeval tv;
   char path[256] = "", strval[20] = "";
   int file;
-
   if (len != sizeof(int64_t)) {
-    fprintf(stderr, "Error: value field size of %u incorrect, should be %ld\n",
-            len, sizeof(unsigned long long));
+    DBGP("Error: value field size of %u incorrect, should be %ld\n", len,
+         sizeof(unsigned long long));
     return PWR_RET_FAILURE;
   }
-
-  switch (attr) {
-  case PWR_ATTR_ENERGY: {
-    snprintf(
-        path, 255,
-        "/sys/devices/virtual/powercap/intel-rapl/intel-rapl\:%d/energy_uj",
-        toilet_FD(fd)->num);
-
-    file = open(path, O_WRONLY);
-    if (file < 0) {
-      fprintf(stderr, "Error: unable to open CPU file at %s\n", path);
+  if (toilet_FD(fd)->type == 1) {
+    switch (attr) {
+    case PWR_ATTR_ENERGY: {
+      snprintf(
+          path, 255,
+          "/sys/devices/virtual/powercap/intel-rapl/intel-rapl\:%d/energy_uj",
+          toilet_FD(fd)->num);
+    } break;
+    default: {
+      DBGP("Error: Unrecognized power attribute.\n");
       return PWR_RET_FAILURE;
     }
-
-    snprintf(strval, 19, "%lf", value);
-    if (write(file, strval, strlen(strval)) < 0) {
-      fprintf(stderr, "Error: unable to write PM counter\n");
-      close(file);
+    }
+  } else {
+    switch (attr) {
+    case PWR_ATTR_FREQ: {
+      snprintf(path, 255,
+               "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_cur_freq",
+               toilet_FD(fd)->num);
+    } break;
+    case PWR_ATTR_FREQ_LIMIT_MAX: {
+      snprintf(path, 255,
+               "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq",
+               toilet_FD(fd)->num);
+    } break;
+    case PWR_ATTR_FREQ_LIMIT_MIN: {
+      snprintf(path, 255,
+               "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq",
+               toilet_FD(fd)->num);
+    } break;
+    default: {
+      DBGP("Error: Unrecognized power attribute.\n");
       return PWR_RET_FAILURE;
     }
-
+    }
+  }
+  sprintf(strval, "%llu", &value);
+  file = open(path, O_WRONLY);
+  if (file < 0) {
+    DBGP("Error: unable to open CPU file at %s\n", path);
+    return PWR_RET_FAILURE;
+  }
+  DBGP("Writing attribute to file %s\n", path);
+  if (write(file, strval, 100) < 0) {
+    DBGP("Error: unable to read PM counter.\n");
     close(file);
-
-    gettimeofday(&tv, NULL);
-    *timestamp = tv.tv_sec * 1000000000ULL + tv.tv_usec * 1000;
-
-    DBGP("Info: reading of type %u at time %llu with value %lf\n", attr,
-         *(unsigned long long *)timestamp, *(double *)value);
-
-    return PWR_RET_SUCCESS;
-  } break;
-  default:
-    fprintf(stderr, "Warning: unknown PWR reading attr (%u) requested\n", attr);
     return PWR_RET_FAILURE;
   }
+  close(file);
+  gettimeofday(&tv, NULL);
+  *timestamp = tv.tv_sec * 1000000000ULL + tv.tv_usec * 1000;
+  DBGP("Info: Writing type %u at time %llu with value %llu\n", attr,
+       *(unsigned long long *)timestamp, (uint64_t)&value);
+  return PWR_RET_SUCCESS;
 }
 
 static int pwr_toiletdev_numObjs() {
@@ -208,12 +281,13 @@ static int pwr_toiletdev_readObjs(int i, PWR_ObjType *ptr) {
 
 static int pwr_toiletdev_numAttrs(PWR_ObjType type) {
   DBGP("\n");
-  return 1;
+  return 2;
 }
 
 static int pwr_toiletdev_readAttrs(PWR_ObjType type, int i, PWR_AttrName *ptr) {
   DBGP("\n");
   ptr[0] = PWR_ATTR_POWER;
+  ptr[0] = PWR_ATTR_FREQ;
   return 0;
 }
 
