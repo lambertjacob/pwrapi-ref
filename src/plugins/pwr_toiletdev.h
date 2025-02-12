@@ -23,8 +23,7 @@ int toilet_close(pwr_fd_t fd);
 int toilet_read(pwr_fd_t fd, PWR_AttrName attr, void *value, unsigned int len,
                 PWR_Time *timestamp);
 
-int toilet_write(pwr_fd_t fd, PWR_AttrName attr, void *value, unsigned int len,
-                 PWR_Time *timestamp);
+int toilet_write(pwr_fd_t fd, PWR_AttrName attr, void *value, unsigned int len);
 
 #ifdef __cplusplus
 }
