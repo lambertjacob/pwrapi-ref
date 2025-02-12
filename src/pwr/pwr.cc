@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/_types/_u_int32_t.h>
+#include <sys/_types/_u_int8_t.h>
 #include <sys/time.h>
 #include <unordered_map>
 
@@ -363,51 +364,67 @@ u_int32_t region_id_counter = 0; //not sure if this needs to be atomic?
 std::unordered_map<u_int32_t, std::pair<PWR_Obj, PWR_RegionHint> > region_id_map;
 
 
-int PWR_AppHintCreate(PWR_Obj obj, const char *name, uint64_t *region_id,
-                      PWR_RegionHint hint) {
+int PWR_AppHintCreate(PWR_Obj obj, const char *name, uint64_t *region_id, PWR_RegionHint hint) {
   
-      *region_id = region_id_counter;
-      region_id_map.insert({region_id_counter, {obj, hint}});
-      region_id_counter++;
+  *region_id = region_id_counter;
+  region_id_map.insert({region_id_counter, {obj, hint}});
+  region_id_counter++;
 
   return PWR_RET_SUCCESS;
 }
 
-int PWR_AppHintDestroy(uint64_t region_id) { 
-  region_id_map.erase(region_id);
+int PWR_AppHintDestroy(uint64_t *region_id) { 
+  region_id_map.erase(*region_id);
   return PWR_RET_SUCCESS;  
 }
 
-int PWR_AppHintStart(uint64_t region_id) { 
+int PWR_AppHintStart(uint64_t *region_id) { 
   
-  std::pair<PWR_Obj, PWR_RegionHint> id_data = region_id_map[region_id];
+  std::pair<PWR_Obj, PWR_RegionHint> id_data = region_id_map[*region_id];
   PWR_Obj obj = id_data.first;
   PWR_RegionHint hint = id_data.second;
 
   switch (hint) {
-    case PWR_REGION_SERIAL:
-    /* online_cpus( parallel ); */
-        return PWR_RET_SUCCESS;
-    case PWR_REGION_PARALLEL:
+    case PWR_REGION_SERIAL: {
+      //need to set for different cores???
+      double *frequency;
+      *frequency = 3200.0;
+      uint8_t rc = PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, frequency);
+      assert(PWR_RET_SUCCESS == rc);
+      printf("PWR_ObjAttrSetValue(PWR_ATTR_FREQ) value=%f\n", *frequency);
+      return PWR_RET_SUCCESS;
+    }
+    case PWR_REGION_PARALLEL: {
       online_cpus(1);
         return PWR_RET_SUCCESS;
-    case PWR_REGION_COMPUTE:
+
+    }
+    case PWR_REGION_COMPUTE: {
       return PWR_RET_SUCCESS;
-    case PWR_REGION_COMMUNICATE:
+
+    }
+    case PWR_REGION_COMMUNICATE: {
         online_cpus(2);
         return PWR_RET_SUCCESS;
-    case PWR_REGION_IO:
+
+    }
+    case PWR_REGION_IO: {
         return PWR_RET_SUCCESS;
-    case PWR_REGION_MEM_BOUND:
+    }
+    case PWR_REGION_MEM_BOUND: {
         return PWR_RET_SUCCESS;
-    case PWR_REGION_DEFAULT:
+    }
+    case PWR_REGION_DEFAULT: {
     default:
       assert(0);
+      return PWR_RET_SUCCESS; 
     }  
-  return PWR_RET_SUCCESS; 
+  }
 }
 
-int PWR_AppHintStop(uint64_t region_id) { return PWR_RET_SUCCESS; }
+int PWR_AppHintStop(uint64_t *region_id) {
+  //will need to return the system to the default state out od user mode?
+  return PWR_RET_SUCCESS; }
 
 int PWR_TimeConvert(PWR_Time in, time_t *out) {
   *out = in / 1000000000;
