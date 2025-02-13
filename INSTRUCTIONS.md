@@ -18,11 +18,7 @@ module load StdEnv/2020
 module load python/2.7.18
 ```
 
-<<<<<<< HEAD
 **_This has been causing issues recently, I suggest installing python 2.7.18 locally instead._**
-=======
-***This has been causing issues recently, I suggest installing python 2.7.18 locally instead.***
->>>>>>> 55371a934ef26f53ed8615b9ebe7a39ae3958b2e
 
 To build PowerAPI and use it in Quicksilver, set the following environment variable:
 
@@ -31,22 +27,16 @@ export POWER_LOC="$(pwd)/build/install"
 ```
 
 Run autogen:
-<<<<<<< HEAD
-
-=======
->>>>>>> 55371a934ef26f53ed8615b9ebe7a39ae3958b2e
 ```bash
 ./autogen.sh
 ```
 
 Then run the configure command with that location for the install.
-
 ```bash
 ./configure --prefix="${POWER_LOC}" --with-mpi --enable-debug
 ```
 
 If using a local Python installation, make sure to point to it:
-
 ```bash
 ./configure --with-python=(Python install path)/bin/python2.7  --prefix="${POWER_LOC}" --with-mpi --enable-debug
 ```
@@ -65,10 +55,5 @@ Use the following command to access node CAC071:
 salloc --qos=privileged --partition=reserved -w cac071
 ```
 
-<<<<<<< HEAD
-## Using and Editor
-=======
 ## Using an Editor
->>>>>>> 55371a934ef26f53ed8615b9ebe7a39ae3958b2e
-
 Since this project uses a lot of dynamic linking, editors get confused by the dependency tree. To account for this, install [Bear](github.com/rizsotto/Bear)
