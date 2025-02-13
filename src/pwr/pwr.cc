@@ -358,42 +358,65 @@ static int online_cpus(int number_desired) {
 
 int PWR_AppHint(PWR_Obj obj, PWR_RegionHint hint) { return PWR_RET_FAILURE; }
 
-u_int32_t region_id_counter = 0; //not sure if this needs to be atomic?
+uint64_t region_id_counter = 0; //not sure if this needs to be atomic?
 std::unordered_map<u_int32_t, std::pair<PWR_Obj, PWR_RegionHint> > region_id_map;
 
 
 int PWR_AppHintCreate(PWR_Obj obj, const char *name, uint64_t *region_id, PWR_RegionHint hint) {
-  
+
   *region_id = region_id_counter;
   region_id_map.insert({region_id_counter, {obj, hint}});
   region_id_counter++;
+
+  printf("Created region hint for %s\n", name);
 
   return PWR_RET_SUCCESS;
 }
 
 int PWR_AppHintDestroy(uint64_t *region_id) { 
   region_id_map.erase(*region_id);
+  
+  printf("Destroyed region hint for id %ld\n", *region_id);
+  
   return PWR_RET_SUCCESS;  
 }
+
 
 int PWR_AppHintStart(uint64_t *region_id) { 
   
   std::pair<PWR_Obj, PWR_RegionHint> id_data = region_id_map[*region_id];
-  PWR_Obj obj = id_data.first;
+  PWR_Obj socket = id_data.first;
   PWR_RegionHint hint = id_data.second;
 
   switch (hint) {
     case PWR_REGION_SERIAL: {
       return PWR_RET_SUCCESS;
     }
+    
     case PWR_REGION_PARALLEL: {
-      //online_cpus(1);
-      //loop through all cores and set the frequency to max. 
-      double *frequency;
-      *frequency = 3200000;
-      uint8_t rc = PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, frequency);
-      assert(PWR_RET_SUCCESS == rc);
-      printf("PWR_ObjAttrSetValue(PWR_ATTR_FREQ) value=%f\n", *frequency);
+      printf("Starting PARALLEL region\n");
+
+      //loop through all cores and set the frequency to max.
+      PWR_Grp cores;
+      PWR_ObjGetChildren(socket, &cores); 
+      int i;
+      printf("num cores = %d\n", PWR_GrpGetNumObjs(cores)); 
+      for (i = 0; i < PWR_GrpGetNumObjs(cores); i++) {
+        char name[100];
+        PWR_Obj obj;
+        PWR_GrpGetObjByIndx(cores, i, &obj);
+        PWR_ObjGetName(obj, name, 100);
+        
+        PWR_AttrGov gov;
+        gov = PWR_GOV_LINUX_USERSPACE;
+        uint64_t target_freq = 2800000;
+        
+        PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
+        PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
+
+        printf("Setting %s to %ld kHz\n", name, target_freq);
+      }
+
       return PWR_RET_SUCCESS;
 
     }
@@ -422,8 +445,30 @@ int PWR_AppHintStart(uint64_t *region_id) {
 }
 
 int PWR_AppHintStop(uint64_t *region_id) {
-  //will need to return the system to the default state out od user mode?
-  return PWR_RET_SUCCESS; }
+  printf("Stopping region\n");
+  std::pair<PWR_Obj, PWR_RegionHint> id_data = region_id_map[*region_id];
+  PWR_Obj socket = id_data.first;
+
+  //loop through all cores and set them back
+  PWR_Grp cores;
+  PWR_ObjGetChildren(socket, &cores); 
+  int i;
+  printf("num cores in here = %d\n", PWR_GrpGetNumObjs(cores));
+  for (i = 0; i < PWR_GrpGetNumObjs(cores); i++) {
+    char name[100];
+    PWR_Obj obj;
+    PWR_GrpGetObjByIndx(cores, i, &obj);
+    PWR_ObjGetName(obj, name, 100);
+    
+    PWR_AttrGov gov;
+    gov = PWR_GOV_LINUX_SCHEDUTIL;
+    
+    PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
+
+    printf("Setting %s to PWR_GOV_LINUX_SCHEDUTIL \n", name);
+  }  
+  return PWR_RET_SUCCESS; 
+}
 
 int PWR_TimeConvert(PWR_Time in, time_t *out) {
   *out = in / 1000000000;

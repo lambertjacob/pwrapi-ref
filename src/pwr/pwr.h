@@ -198,9 +198,9 @@ int PWR_CntxtGetGrpByType(PWR_Cntxt, PWR_ObjType, PWR_Grp *);
 
 int PWR_AppHintCreate(PWR_Obj obj, const char *name, uint64_t *region_id,
                       PWR_RegionHint hint);
-int PWR_AppHintDestroy(uint64_t region_id);
-int PWR_AppHintStart(uint64_t region_id);
-int PWR_AppHintStop(uint64_t region_id);
+int PWR_AppHintDestroy(uint64_t *region_id);
+int PWR_AppHintStart(uint64_t *region_id);
+int PWR_AppHintStop(uint64_t *region_id);
 
 #ifdef __cplusplus
 }
