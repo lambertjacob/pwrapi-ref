@@ -59,7 +59,6 @@ plugin_devops_t devops = {
     .close = cac_close,
     .read = cac_read,
     .write = cac_write,
-    .private_data = 0x0,
 };
 
 plugin_dev_t dev = {
@@ -218,53 +217,6 @@ int cac_read(pwr_fd_t fd, PWR_AttrName attr, void *value, unsigned int len,
 }
 
 int cac_write(pwr_fd_t fd, PWR_AttrName attr, void *value, unsigned int len) {
-  return 0;
-}
-
-static int cpudev_read(int cpu, const char *name, double *val) {
-  char path[256] = "", strval[20] = "";
-  int offset = 0;
-  int fd;
-
-  snprintf(path, 255, "/sys/devices/system/cpu/cpu%i/%s", cpu, name);
-  DBGP("%s\n", path);
-  fd = open(path, O_RDONLY);
-  if (fd < 0) {
-    fprintf(stderr, "Error: unable to open CPU file at %s\n", path);
-    return -1;
-  }
-
-  while (read(fd, strval + offset, 1) != EOF) {
-    if (strval[offset] == ' ') {
-      *val = atof(strval);
-      return 0;
-    }
-    offset++;
-  }
-
-  fprintf(stderr, "Error: unable to parse PM counter value\n");
-  return -1;
-}
-
-static int cpudev_write(int cpu, const char *name, double val) {
-  char path[256] = "", strval[20] = "";
-  int fd;
-
-  snprintf(path, 255, "/sys/devices/system/cpu/cpu%i/%s", cpu, name);
-  fd = open(path, O_WRONLY);
-  if (fd < 0) {
-    fprintf(stderr, "Error: unable to open CPU file at %s\n", path);
-    return -1;
-  }
-
-  snprintf(strval, 19, "%lf", val);
-  if (write(fd, strval, strlen(strval)) < 0) {
-    fprintf(stderr, "Error: unable to write PM counter\n");
-    close(fd);
-    return -1;
-  }
-
-  close(fd);
   return 0;
 }
 

@@ -537,6 +537,7 @@ std::string PythonConfig::attrNameToString( PWR_AttrName name )
     case PWR_ATTR_ENERGY: return "ENERGY";
     case PWR_ATTR_TEMP: return "TEMP";
     case PWR_ATTR_OS_ID: return "OS_ID";
+    case PWR_ATTR_GOV: return "GOV";
     case PWR_ATTR_THROTTLED_TIME: return "THROTTLED_TIME";
     case PWR_ATTR_THROTTLED_COUNT: return "THROTTLED_COUNT";
     default: return "";
