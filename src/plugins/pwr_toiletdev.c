@@ -262,20 +262,67 @@ int toilet_write(pwr_fd_t fd, PWR_AttrName attr, void *value,
   } else {
     sprintf(strval, "%lu", *(uint64_t *)value);
   }
-  file = open(path, O_WRONLY);
-  if (file < 0) {
-    DBGP("Error: unable to open CPU file at %s\n", path);
-    return PWR_RET_FAILURE;
+
+  // We need to set stuff to multiple files if we're setting frequency.
+  if (attr == PWR_ATTR_FREQ) {
+    char *files[3] = {"scaling_setspeed", "scaling_max_freq", "scaling_min_freq"};
+
+    // For each file, write the the frequency value we want
+    for (int i = 0; i < 3; i++) {
+      snprintf(path, 255, "/sys/devices/system/cpu/cpu%d/cpufreq/%s",
+               toilet_FD(fd)->num, files[i]);
+      file = open(path, O_WRONLY);
+      if (file < 0) {
+        DBGP("Error: unable to open CPU file at %s\n", path);
+        return PWR_RET_FAILURE;
+      }
+      DBGP("Writing attribute to file %s\n", path);
+      if (write(file, strval, 100) < 0) {
+        DBGP("Error: unable to write PM counter.\n");
+        close(file);
+        return PWR_RET_FAILURE;
+      }
+      close(file);
+    }
+
+    // We also need to disable all idle states except state0 for the cpu (goes up to state 4)
+    for (int i = 1; i < 5; i++)
+    {
+      snprintf(path, 255, "/sys/devices/system/cpu/cpu%d/cpuidle/state%d/disable",
+        toilet_FD(fd)->num, i);
+      file = open(path, O_WRONLY);
+      if (file < 0) {
+      DBGP("Error: unable to open CPU file at %s\n", path);
+      return PWR_RET_FAILURE;
+      }
+      DBGP("Writing attribute to file %s\n", path);
+      if (write(file, "1", 100) < 0) {
+      DBGP("Error: unable to write PM counter.\n");
+      close(file);
+      return PWR_RET_FAILURE;
+      }
+      close(file);
+    }
+    
   }
-  DBGP("Writing attribute to file %s\n", path);
-  if (write(file, strval, 100) < 0) {
-    DBGP("Error: unable to write PM counter.\n");
+  else 
+  {
+    file = open(path, O_WRONLY);
+    if (file < 0) {
+      DBGP("Error: unable to open CPU file at %s\n", path);
+      return PWR_RET_FAILURE;
+    }
+    DBGP("Writing attribute to file %s\n", path);
+  
+    if (write(file, strval, 100) < 0) {
+      DBGP("Error: unable to write PM counter.\n");
+      close(file);
+      return PWR_RET_FAILURE;
+    }
     close(file);
-    return PWR_RET_FAILURE;
+    DBGP("Info: Writing type %u with value %s\n", attr, strval);
+    return PWR_RET_SUCCESS;
   }
-  close(file);
-  DBGP("Info: Writing type %u with value %s\n", attr, strval);
-  return PWR_RET_SUCCESS;
 }
 
 static int pwr_toiletdev_numObjs() {
