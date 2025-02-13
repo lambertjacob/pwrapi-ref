@@ -12,8 +12,6 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/_types/_u_int32_t.h>
-#include <sys/_types/_u_int8_t.h>
 #include <sys/time.h>
 #include <unordered_map>
 
