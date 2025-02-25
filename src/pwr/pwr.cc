@@ -396,7 +396,7 @@ int PWR_AppHintStart(uint64_t *region_id) {
     case PWR_REGION_PARALLEL: {
       printf("Starting PARALLEL region\n");
 
-      //loop through all cores and set the frequency to max.
+      //loop through all cores and set governor to performance mode
       PWR_Grp cores;
       PWR_ObjGetChildren(socket, &cores); 
       int i;
@@ -408,13 +408,15 @@ int PWR_AppHintStart(uint64_t *region_id) {
         PWR_ObjGetName(obj, name, 100);
         
         PWR_AttrGov gov;
-        gov = PWR_GOV_LINUX_USERSPACE;
-        uint64_t target_freq = 2800000;
+        gov = PWR_GOV_LINUX_PERFORMANCE;
+        // uint64_t target_freq = 3200000;
         
         PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
-        PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
+        printf("Setting %s to PWR_GOV_LINUX_PERFORMANCE \n", name);
 
-        printf("Setting %s to %ld kHz\n", name, target_freq);
+        // PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
+
+        // printf("Setting %s to %ld kHz\n", name, target_freq);
       }
 
       return PWR_RET_SUCCESS;
@@ -461,11 +463,11 @@ int PWR_AppHintStop(uint64_t *region_id) {
     PWR_ObjGetName(obj, name, 100);
     
     PWR_AttrGov gov;
-    gov = PWR_GOV_LINUX_SCHEDUTIL;
+    gov = PWR_GOV_LINUX_POWERSAVE;
     
     PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
 
-    printf("Setting %s to PWR_GOV_LINUX_SCHEDUTIL \n", name);
+    printf("Setting %s to PWR_GOV_LINUX_POWERSAVE \n", name);
   }  
   return PWR_RET_SUCCESS; 
 }

@@ -269,56 +269,56 @@ int toilet_write(pwr_fd_t fd, PWR_AttrName attr, void *value,
       sprintf(strval, "schedutil");
     }
 
-    if (set_default)
-    {
-      char path2[256] = "";
+    // if (set_default)
+    // {
+    //   char path2[256] = "";
 
-      // set all idle state settings back to default if we set governor to anything other than userspace
-      for (int i = 1; i < 5; i++)
-      {
-        snprintf(path2, 255, "/sys/devices/system/cpu/cpu%d/cpuidle/state%d/disable",
-                 toilet_FD(fd)->num, i);
-        file = open(path2, O_WRONLY);
-        if (file < 0)
-        {
-          DBGP("Error: unable to open CPU file at %s\n", path2);
-          return PWR_RET_FAILURE;
-        }
-        DBGP("Writing attribute to file %s\n", path2);
-        if (write(file, "0", 100) < 0)
-        {
-          DBGP("Error: unable to write PM counter.\n");
-          close(file);
-          return PWR_RET_FAILURE;
-        }
-        close(file);
-      }
+    //   // set all idle state settings back to default if we set governor to anything other than userspace
+    //   for (int i = 1; i < 5; i++)
+    //   {
+    //     snprintf(path2, 255, "/sys/devices/system/cpu/cpu%d/cpuidle/state%d/disable",
+    //              toilet_FD(fd)->num, i);
+    //     file = open(path2, O_WRONLY);
+    //     if (file < 0)
+    //     {
+    //       DBGP("Error: unable to open CPU file at %s\n", path2);
+    //       return PWR_RET_FAILURE;
+    //     }
+    //     DBGP("Writing attribute to file %s\n", path2);
+    //     if (write(file, "0", 100) < 0)
+    //     {
+    //       DBGP("Error: unable to write PM counter.\n");
+    //       close(file);
+    //       return PWR_RET_FAILURE;
+    //     }
+    //     close(file);
+    //   }
 
-      // Also reset the frequency limits to default
-      char *files[2] = {"scaling_max_freq", "scaling_min_freq"};
-      char *defaults[2] = {"3200000", "1600000"}; // TEMPORARY TEST, NEED TO GET DEFAULTS FROM SYSTEM LATER
+    //   // Also reset the frequency limits to default
+    //   char *files[2] = {"scaling_max_freq", "scaling_min_freq"};
+    //   char *defaults[2] = {"3200000", "1600000"}; // TEMPORARY TEST, NEED TO GET DEFAULTS FROM SYSTEM LATER
 
-      // Reset min and max frequency files to default values
-      for (int i = 0; i < 2; i++)
-      {
-        snprintf(path2, 255, "/sys/devices/system/cpu/cpu%d/cpufreq/%s",
-                 toilet_FD(fd)->num, files[i]);
-        file = open(path2, O_WRONLY);
-        if (file < 0)
-        {
-          DBGP("Error: unable to open CPU file at %s\n", path2);
-          return PWR_RET_FAILURE;
-        }
-        DBGP("Writing attribute to file %s\n", path2);
-        if (write(file, defaults[i], 100) < 0)
-        {
-          DBGP("Error: unable to write PM counter.\n");
-          close(file);
-          return PWR_RET_FAILURE;
-        }
-        close(file);
-      }
-    }
+    //   // Reset min and max frequency files to default values
+    //   for (int i = 0; i < 2; i++)
+    //   {
+    //     snprintf(path2, 255, "/sys/devices/system/cpu/cpu%d/cpufreq/%s",
+    //              toilet_FD(fd)->num, files[i]);
+    //     file = open(path2, O_WRONLY);
+    //     if (file < 0)
+    //     {
+    //       DBGP("Error: unable to open CPU file at %s\n", path2);
+    //       return PWR_RET_FAILURE;
+    //     }
+    //     DBGP("Writing attribute to file %s\n", path2);
+    //     if (write(file, defaults[i], 100) < 0)
+    //     {
+    //       DBGP("Error: unable to write PM counter.\n");
+    //       close(file);
+    //       return PWR_RET_FAILURE;
+    //     }
+    //     close(file);
+    //   }
+    // }
   } else {
     sprintf(strval, "%lu", *(uint64_t *)value);
   }
