@@ -374,6 +374,26 @@ int PWR_AppHintCreate(PWR_Obj obj, const char *name, uint64_t *region_id, PWR_Re
 }
 
 int PWR_AppHintDestroy(uint64_t *region_id) { 
+  std::pair<PWR_Obj, PWR_RegionHint> id_data = region_id_map[*region_id];
+  PWR_Obj socket = id_data.first;
+  PWR_RegionHint hint = id_data.second;
+  PWR_Grp cores;
+  PWR_ObjGetChildren(socket, &cores); 
+  int i;
+  printf("num cores = %d\n", PWR_GrpGetNumObjs(cores)); 
+  for (i = 0; i < PWR_GrpGetNumObjs(cores); i++) {
+    char name[100];
+    PWR_Obj obj;
+    PWR_GrpGetObjByIndx(cores, i, &obj);
+    PWR_ObjGetName(obj, name, 100);
+    
+    PWR_AttrGov gov;
+    gov = PWR_GOV_LINUX_SCHEDUTIL;
+    
+    PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
+    printf("Setting %s to SCHEDUTIL\n", name);
+  }
+
   region_id_map.erase(*region_id);
   
   printf("Destroyed region hint for id %ld\n", *region_id);
@@ -387,6 +407,26 @@ int PWR_AppHintStart(uint64_t *region_id) {
   std::pair<PWR_Obj, PWR_RegionHint> id_data = region_id_map[*region_id];
   PWR_Obj socket = id_data.first;
   PWR_RegionHint hint = id_data.second;
+  //loop through all cores and set the frequency to max.
+      PWR_Grp cores;
+      PWR_ObjGetChildren(socket, &cores); 
+      int i;
+      printf("num cores = %d\n", PWR_GrpGetNumObjs(cores)); 
+      for (i = 0; i < PWR_GrpGetNumObjs(cores); i++) {
+        char name[100];
+        PWR_Obj obj;
+        PWR_GrpGetObjByIndx(cores, i, &obj);
+        PWR_ObjGetName(obj, name, 100);
+        
+        PWR_AttrGov gov;
+        gov = PWR_GOV_LINUX_USERSPACE;
+        uint64_t target_freq = 2800000;
+        
+        PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
+        PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
+
+        printf("Setting %s to %ld kHz\n", name, target_freq);
+      }
 
   switch (hint) {
     case PWR_REGION_SERIAL: {
@@ -449,7 +489,7 @@ int PWR_AppHintStop(uint64_t *region_id) {
   std::pair<PWR_Obj, PWR_RegionHint> id_data = region_id_map[*region_id];
   PWR_Obj socket = id_data.first;
 
-  //loop through all cores and set them back
+  //loop through all cores and set them to minimum freq
   PWR_Grp cores;
   PWR_ObjGetChildren(socket, &cores); 
   int i;
@@ -460,12 +500,21 @@ int PWR_AppHintStop(uint64_t *region_id) {
     PWR_GrpGetObjByIndx(cores, i, &obj);
     PWR_ObjGetName(obj, name, 100);
     
-    PWR_AttrGov gov;
-    gov = PWR_GOV_LINUX_SCHEDUTIL;
+    // PWR_AttrGov gov;
+    // gov = PWR_GOV_LINUX_SCHEDUTIL;
     
-    PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
+    // PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
 
-    printf("Setting %s to PWR_GOV_LINUX_SCHEDUTIL \n", name);
+    // printf("Setting %s to PWR_GOV_LINUX_SCHEDUTIL \n", name);
+    PWR_AttrGov gov;
+    gov = PWR_GOV_LINUX_USERSPACE;
+    uint64_t target_freq = 1600000;
+    
+    // PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
+    PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
+
+    printf("Setting %s to %ld kHz\n", name, target_freq);
+
   }  
   return PWR_RET_SUCCESS; 
 }
