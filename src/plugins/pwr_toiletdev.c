@@ -296,7 +296,7 @@ int toilet_write(pwr_fd_t fd, PWR_AttrName attr, void *value,
 
       // Also reset the frequency limits to default
       char *files[2] = {"scaling_max_freq", "scaling_min_freq"};
-      char *defaults[2] = {"3200000", "1600000"}; // TEMPORARY TEST, NEED TO GET DEFAULTS FROM SYSTEM LATER
+      char *defaults[2] = {"2000000", "1200000"}; // TEMPORARY TEST, NEED TO GET DEFAULTS FROM SYSTEM LATER
 
       // Reset min and max frequency files to default values
       for (int i = 0; i < 2; i++)
@@ -328,7 +328,7 @@ int toilet_write(pwr_fd_t fd, PWR_AttrName attr, void *value,
     char *files[3] = {"scaling_setspeed", "scaling_max_freq", "scaling_min_freq"};
 
     // For each file, write the the frequency value we want
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 1; i++) {
       snprintf(path, 255, "/sys/devices/system/cpu/cpu%d/cpufreq/%s",
                toilet_FD(fd)->num, files[i]);
       file = open(path, O_WRONLY);
