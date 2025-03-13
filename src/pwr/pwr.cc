@@ -368,12 +368,13 @@ int PWR_AppHintCreate(PWR_Obj obj, const char *name, uint64_t *region_id, PWR_Re
   region_id_map.insert({region_id_counter, {obj, hint}});
   region_id_counter++;
 
-  printf("Created region hint for %s\n", name);
+  printf("[HINT] Created region hint for %s\n", name);
 
   return PWR_RET_SUCCESS;
 }
 
 int PWR_AppHintDestroy(uint64_t *region_id) { 
+  printf("[HINT] Destroying region hint for id %ld, setting governors to powersave...\n", *region_id);
   std::pair<PWR_Obj, PWR_RegionHint> id_data = region_id_map[*region_id];
   PWR_Obj socket = id_data.first;
   PWR_RegionHint hint = id_data.second;
@@ -396,7 +397,7 @@ int PWR_AppHintDestroy(uint64_t *region_id) {
 
   region_id_map.erase(*region_id);
   
-  printf("Destroyed region hint for id %ld\n", *region_id);
+  printf("[HINT] Destroyed region hint for id %ld\n", *region_id);
   
   return PWR_RET_SUCCESS;  
 }
@@ -411,22 +412,7 @@ int PWR_AppHintStart(uint64_t *region_id) {
       PWR_Grp cores;
       PWR_ObjGetChildren(socket, &cores); 
       int i;
-      printf("num cores = %d\n", PWR_GrpGetNumObjs(cores)); 
-      for (i = 0; i < PWR_GrpGetNumObjs(cores); i++) {
-        char name[100];
-        PWR_Obj obj;
-        PWR_GrpGetObjByIndx(cores, i, &obj);
-        PWR_ObjGetName(obj, name, 100);
-        
-        PWR_AttrGov gov;
-        gov = PWR_GOV_LINUX_USERSPACE;
-        uint64_t target_freq = 2000000;
-        
-        PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
-        PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
-
-        printf("Setting %s to %ld kHz\n", name, target_freq);
-      }
+      printf("[HINT] Starting Application Hint for region %ld\n", *region_id);
 
   switch (hint) {
     case PWR_REGION_SERIAL: {
@@ -434,7 +420,7 @@ int PWR_AppHintStart(uint64_t *region_id) {
     }
     
     case PWR_REGION_PARALLEL: {
-      printf("Starting PARALLEL region\n");
+      printf("[HINT] Starting PARALLEL region, maxing out all cores...\n");
 
       //loop through all cores and set the frequency to max.
       PWR_Grp cores;
@@ -454,7 +440,7 @@ int PWR_AppHintStart(uint64_t *region_id) {
         PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
         PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
 
-        printf("Setting %s to %ld kHz\n", name, target_freq);
+        printf("Setting %s to %ld kHz and gov to USERSPACE\n", name, target_freq);
       }
 
       return PWR_RET_SUCCESS;
@@ -485,7 +471,7 @@ int PWR_AppHintStart(uint64_t *region_id) {
 }
 
 int PWR_AppHintStop(uint64_t *region_id) {
-  printf("Stopping region\n");
+  printf("[HINT] Stopping Application Hint for region, set all cores to min frequency... %ld\n", *region_id);
   std::pair<PWR_Obj, PWR_RegionHint> id_data = region_id_map[*region_id];
   PWR_Obj socket = id_data.first;
 
@@ -493,7 +479,6 @@ int PWR_AppHintStop(uint64_t *region_id) {
   PWR_Grp cores;
   PWR_ObjGetChildren(socket, &cores); 
   int i;
-  printf("num cores in here = %d\n", PWR_GrpGetNumObjs(cores));
   for (i = 0; i < PWR_GrpGetNumObjs(cores); i++) {
     char name[100];
     PWR_Obj obj;
