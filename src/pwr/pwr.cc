@@ -388,10 +388,10 @@ int PWR_AppHintDestroy(uint64_t *region_id) {
     PWR_ObjGetName(obj, name, 100);
     
     PWR_AttrGov gov;
-    gov = PWR_GOV_LINUX_SCHEDUTIL;
+    gov = PWR_GOV_LINUX_POWERSAVE;
     
     PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
-    printf("Setting %s to SCHEDUTIL\n", name);
+    printf("Setting %s to POWERSAVE\n", name);
   }
 
   region_id_map.erase(*region_id);
@@ -420,7 +420,7 @@ int PWR_AppHintStart(uint64_t *region_id) {
         
         PWR_AttrGov gov;
         gov = PWR_GOV_LINUX_USERSPACE;
-        uint64_t target_freq = 2800000;
+        uint64_t target_freq = 2000000;
         
         PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
         PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
@@ -449,7 +449,7 @@ int PWR_AppHintStart(uint64_t *region_id) {
         
         PWR_AttrGov gov;
         gov = PWR_GOV_LINUX_USERSPACE;
-        uint64_t target_freq = 2800000;
+        uint64_t target_freq = 2000000;
         
         PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
         PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
@@ -499,22 +499,10 @@ int PWR_AppHintStop(uint64_t *region_id) {
     PWR_Obj obj;
     PWR_GrpGetObjByIndx(cores, i, &obj);
     PWR_ObjGetName(obj, name, 100);
-    
-    // PWR_AttrGov gov;
-    // gov = PWR_GOV_LINUX_SCHEDUTIL;
-    
-    // PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
 
-    // printf("Setting %s to PWR_GOV_LINUX_SCHEDUTIL \n", name);
-    PWR_AttrGov gov;
-    gov = PWR_GOV_LINUX_USERSPACE;
-    uint64_t target_freq = 1600000;
-    
-    // PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
+    uint64_t target_freq = 1200000;
     PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
-
     printf("Setting %s to %ld kHz\n", name, target_freq);
-
   }  
   return PWR_RET_SUCCESS; 
 }
