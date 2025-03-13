@@ -371,13 +371,10 @@ int PWR_AppHintCreate(PWR_Obj obj, const char *name, uint64_t *region_id, PWR_Re
   region_id_map.insert({region_id_counter, {obj, hint}});
   region_id_counter++;
 
-  printf("[HINT] Created region hint for %s\n", name);
-
   return PWR_RET_SUCCESS;
 }
 
 int PWR_AppHintDestroy(uint64_t *region_id) { 
-  printf("[HINT] Destroying region hint for id %ld, setting governors to powersave...\n", *region_id);
   std::pair<PWR_Obj, PWR_RegionHint> id_data = region_id_map[*region_id];
   PWR_Obj socket = id_data.first;
   PWR_RegionHint hint = id_data.second;
@@ -435,7 +432,6 @@ int PWR_AppHintStart(uint64_t *region_id) {
 
       for (int i = 0; i < PWR_GrpGetNumObjs(cores); i++) {
         if (i != 1) {
-          std::cout << "Setting: " << i << std::endl;
           PWR_GrpGetObjByIndx(cores, i, &obj);
           target_freq = 1200000;
           PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
@@ -448,6 +444,7 @@ int PWR_AppHintStart(uint64_t *region_id) {
     
     case PWR_REGION_PARALLEL: {
 
+      std::cout << "Entering parallel region" << std::endl;
       cpu_set_t cpuSet;
       CPU_ZERO(&cpuSet);
       CPU_SET(0, &cpuSet);
@@ -465,16 +462,11 @@ int PWR_AppHintStart(uint64_t *region_id) {
 
       for (int i = 0; i < PWR_GrpGetNumObjs(cores); i++) {
         PWR_GrpGetObjByIndx(cores, i, &obj);
-        PWR_ObjGetName(obj, name, 100);
-        
-        PWR_AttrGov gov;
-        gov = PWR_GOV_LINUX_ONDEMAND;
-        uint64_t target_freq = 2000000;
         
         PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
         PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
 
-        // printf("Setting %s to %ld kHz and gov to USERSPACE\n", name, target_freq);
+        printf("Setting %ld kHz and gov to USERSPACE\n", target_freq);
       }
 
       return PWR_RET_SUCCESS;
@@ -512,15 +504,16 @@ int PWR_AppHintStop(uint64_t *region_id) {
   PWR_Grp cores;
   PWR_ObjGetChildren(socket, &cores); 
   int i;
+  PWR_AttrGov gov = PWR_GOV_LINUX_ONDEMAND;
   for (i = 0; i < PWR_GrpGetNumObjs(cores); i++) {
     char name[100];
     PWR_Obj obj;
     PWR_GrpGetObjByIndx(cores, i, &obj);
-    PWR_ObjGetName(obj, name, 100);
+    // PWR_ObjGetName(obj, name, 100);
 
-    uint64_t target_freq = 1200000;
-    PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
-    printf("Setting %s to %ld kHz\n", name, target_freq);
+    // uint64_t target_freq = 1200000;
+    PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
+    // printf("Setting %s to %ld kHz\n", name, target_freq);
   }  
   return PWR_RET_SUCCESS; 
 }
