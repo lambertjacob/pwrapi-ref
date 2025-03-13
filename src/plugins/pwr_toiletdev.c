@@ -403,6 +403,7 @@ int toilet_write(pwr_fd_t fd, PWR_AttrName attr, void *value,
       if (write(file, strval, 100) < 0)
       {
         DBGP("Error: unable to write PM counter.\n");
+        DBGP("toilet_write(): Failed to write %s, errno: %d (%s)\n", path, errno, strerror(errno));
         close(file);
         return PWR_RET_FAILURE;
       }
