@@ -13,6 +13,8 @@
 #include <sys/fcntl.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <string.h>
+#include <errno.h>
 
 #include "pwr_dev.h"
 #include "pwr_toiletdev.h"
@@ -368,6 +370,7 @@ int toilet_write(pwr_fd_t fd, PWR_AttrName attr, void *value,
         if (write(file, defaults[i], 100) < 0)
         {
           DBGP("Error: unable to write PM counter.\n");
+          DBGP("toilet_write(): Failed to write %s, errno: %d (%s)\n", path, errno, strerror(errno));
           close(file);
           return PWR_RET_FAILURE;
         }
