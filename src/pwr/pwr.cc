@@ -14,6 +14,8 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unordered_map>
+#include <cstdlib>
+#include <iostream>
 
 #include "distCntxt.h"
 #include "distObject.h"
@@ -25,6 +27,7 @@
 #include "pwrtypes.h"
 #include "stat.h"
 #include "status.h"
+#include "sched.h"
 
 using namespace PowerAPI;
 
@@ -389,7 +392,7 @@ int PWR_AppHintDestroy(uint64_t *region_id) {
     PWR_ObjGetName(obj, name, 100);
     
     PWR_AttrGov gov;
-    gov = PWR_GOV_LINUX_POWERSAVE;
+    gov = PWR_GOV_LINUX_ONDEMAND;
     
     PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
     printf("Setting %s to POWERSAVE\n", name);
@@ -408,43 +411,73 @@ int PWR_AppHintStart(uint64_t *region_id) {
   std::pair<PWR_Obj, PWR_RegionHint> id_data = region_id_map[*region_id];
   PWR_Obj socket = id_data.first;
   PWR_RegionHint hint = id_data.second;
-  //loop through all cores and set the frequency to max.
-      PWR_Grp cores;
-      PWR_ObjGetChildren(socket, &cores); 
-      int i;
-      printf("[HINT] Starting Application Hint for region %ld\n", *region_id);
 
   switch (hint) {
     case PWR_REGION_SERIAL: {
+      std::cout << "Starting serial region" << std::endl;
+      // pin to core 1
+      cpu_set_t cpuSet;
+      CPU_ZERO(&cpuSet);
+      CPU_SET(1, &cpuSet);
+      sched_setaffinity(0, sizeof(cpuSet), &cpuSet);
+
+      // set everything with the exception of core 1 to the lowest possible frequency
+      PWR_Grp cores;
+      PWR_ObjGetChildren(socket, &cores); 
+
+      PWR_Obj obj;
+      PWR_GrpGetObjByIndx(cores, 1, &obj);
+      PWR_AttrGov gov;
+      gov = PWR_GOV_LINUX_USERSPACE;
+      uint64_t target_freq = 2000000;
+      PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
+      PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
+
+      for (int i = 0; i < PWR_GrpGetNumObjs(cores); i++) {
+        if (i != 1) {
+          std::cout << "Setting: " << i << std::endl;
+          PWR_GrpGetObjByIndx(cores, i, &obj);
+          target_freq = 1200000;
+          PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
+          PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
+        }
+      }
+
       return PWR_RET_SUCCESS;
     }
     
     case PWR_REGION_PARALLEL: {
-      printf("[HINT] Starting PARALLEL region, maxing out all cores...\n");
 
-      //loop through all cores and set the frequency to max.
+      cpu_set_t cpuSet;
+      CPU_ZERO(&cpuSet);
+      CPU_SET(0, &cpuSet);
+      CPU_SET(1, &cpuSet);
+      CPU_SET(2, &cpuSet);
+      CPU_SET(3, &cpuSet);
+      sched_setaffinity(0, sizeof(cpuSet), &cpuSet);
+
+      // set all cores to MAX
       PWR_Grp cores;
       PWR_ObjGetChildren(socket, &cores); 
-      int i;
-      printf("num cores = %d\n", PWR_GrpGetNumObjs(cores)); 
-      for (i = 0; i < PWR_GrpGetNumObjs(cores); i++) {
-        char name[100];
-        PWR_Obj obj;
+      PWR_Obj obj;
+      PWR_AttrGov gov = PWR_GOV_LINUX_USERSPACE;
+      uint64_t target_freq = 2000000;
+
+      for (int i = 0; i < PWR_GrpGetNumObjs(cores); i++) {
         PWR_GrpGetObjByIndx(cores, i, &obj);
         PWR_ObjGetName(obj, name, 100);
         
         PWR_AttrGov gov;
-        gov = PWR_GOV_LINUX_USERSPACE;
+        gov = PWR_GOV_LINUX_ONDEMAND;
         uint64_t target_freq = 2000000;
         
         PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
         PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
 
-        printf("Setting %s to %ld kHz and gov to USERSPACE\n", name, target_freq);
+        // printf("Setting %s to %ld kHz and gov to USERSPACE\n", name, target_freq);
       }
 
       return PWR_RET_SUCCESS;
-
     }
     case PWR_REGION_COMPUTE: {
       return PWR_RET_SUCCESS;
