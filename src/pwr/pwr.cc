@@ -471,7 +471,7 @@ int PWR_AppHintStart(uint64_t *region_id) {
 }
 
 int PWR_AppHintStop(uint64_t *region_id) {
-  printf("[HINT] Stopping Application Hint for region, set all cores to min frequency... %ld\n", *region_id);
+  printf("[HINT] Stopping Application Hint for region %ld, set all cores to min frequency...\n", *region_id);
   std::pair<PWR_Obj, PWR_RegionHint> id_data = region_id_map[*region_id];
   PWR_Obj socket = id_data.first;
 
