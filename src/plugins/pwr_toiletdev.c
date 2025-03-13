@@ -400,7 +400,7 @@ int toilet_write(pwr_fd_t fd, PWR_AttrName attr, void *value,
         return PWR_RET_FAILURE;
       }
       DBGP("Writing attribute to file %s\n", path);
-      if (write(file, strval, 100) < 0)
+      if (write(file, strval, 20) < 0)
       {
         DBGP("Error: unable to write PM counter.\n");
         DBGP("toilet_write(): Failed to write %s, errno: %d (%s)\n", path, errno, strerror(errno));
