@@ -352,8 +352,8 @@ int toilet_write(pwr_fd_t fd, PWR_AttrName attr, void *value,
       char path2[256] = "";
 
       // reset the frequency limits to default
-      char *files[2] = {"scaling_max_freq", "scaling_min_freq"};
-      char *defaults[2] = {"2000000", "1200000"};
+      char *files[2] = {"scaling_min_freq", "scaling_max_freq"};
+      char *defaults[2] = {"1200000", "2000000"};
 
       // Reset min and max frequency files to default values
       for (int i = 0; i < 2; i++)
@@ -386,7 +386,7 @@ int toilet_write(pwr_fd_t fd, PWR_AttrName attr, void *value,
   // We need to set stuff to multiple files if we're setting frequency.
   if (attr == PWR_ATTR_FREQ)
   {
-    char *files[3] = {"scaling_setspeed", "scaling_max_freq", "scaling_min_freq"};
+    char *files[3] = {"scaling_min_freq", "scaling_max_freq", "scaling_setspeed"};
 
     // For each file, write the the frequency value we want
     for (int i = 0; i < 3; i++)
