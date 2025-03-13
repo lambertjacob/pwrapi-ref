@@ -389,7 +389,7 @@ int toilet_write(pwr_fd_t fd, PWR_AttrName attr, void *value,
     char *files[3] = {"scaling_setspeed", "scaling_max_freq", "scaling_min_freq"};
 
     // For each file, write the the frequency value we want
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 3; i++)
     {
       snprintf(path, 255, "/sys/devices/system/cpu/cpu%d/cpufreq/%s",
                toilet_FD(fd)->num, files[i]);
