@@ -399,7 +399,7 @@ int toilet_write(pwr_fd_t fd, PWR_AttrName attr, void *value,
         DBGP("Error: unable to open CPU file at %s\n", path);
         return PWR_RET_FAILURE;
       }
-      DBGP("Writing attribute to file %s\n", path);
+      DBGP("Writing %s to file %s\n", strval, path);
       if (write(file, strval, 20) < 0)
       {
         DBGP("Error: unable to write PM counter.\n");
