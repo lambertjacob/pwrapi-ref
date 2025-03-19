@@ -25,6 +25,7 @@
 #include "pwrtypes.h"
 #include "stat.h"
 #include "status.h"
+#include "sched.h"
 
 using namespace PowerAPI;
 
@@ -407,62 +408,29 @@ int PWR_AppHintStart(uint64_t *region_id) {
   std::pair<PWR_Obj, PWR_RegionHint> id_data = region_id_map[*region_id];
   PWR_Obj socket = id_data.first;
   PWR_RegionHint hint = id_data.second;
-  //loop through all cores and set the frequency to max.
-      PWR_Grp cores;
-      PWR_ObjGetChildren(socket, &cores); 
-      int i;
-      printf("num cores = %d\n", PWR_GrpGetNumObjs(cores)); 
-      for (i = 0; i < PWR_GrpGetNumObjs(cores); i++) {
-        char name[100];
-        PWR_Obj obj;
-        PWR_GrpGetObjByIndx(cores, i, &obj);
-        PWR_ObjGetName(obj, name, 100);
-        
-        PWR_AttrGov gov;
-        gov = PWR_GOV_LINUX_USERSPACE;
-        uint64_t target_freq = 2800000;
-        
-        PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
-        PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
-
-        printf("Setting %s to %ld kHz\n", name, target_freq);
-      }
 
   switch (hint) {
     case PWR_REGION_SERIAL: {
+      // TODO
       return PWR_RET_SUCCESS;
     }
     
     case PWR_REGION_PARALLEL: {
-      printf("Starting PARALLEL region\n");
-
-      //loop through all cores and set the frequency to max.
-      PWR_Grp cores;
-      PWR_ObjGetChildren(socket, &cores); 
-      int i;
-      printf("num cores = %d\n", PWR_GrpGetNumObjs(cores)); 
-      for (i = 0; i < PWR_GrpGetNumObjs(cores); i++) {
-        char name[100];
-        PWR_Obj obj;
-        PWR_GrpGetObjByIndx(cores, i, &obj);
-        PWR_ObjGetName(obj, name, 100);
-        
-        PWR_AttrGov gov;
-        gov = PWR_GOV_LINUX_USERSPACE;
-        uint64_t target_freq = 2800000;
-        
-        PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
-        PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ, &target_freq);
-
-        printf("Setting %s to %ld kHz\n", name, target_freq);
-      }
-
+      // TODO
       return PWR_RET_SUCCESS;
-
     }
     case PWR_REGION_COMPUTE: {
+      // Scale all cores to their maximum operating frequency
+      uint64_t upper_lim = 3200000;
+      PWR_Grp cores;
+      PWR_ObjGetChildren(socket, &cores); 
+      for (int i = 0; i < PWR_GrpGetNumObjs(cores); i++) {
+        PWR_Obj obj;
+        PWR_GrpGetObjByIndx(cores, i, &obj);
+        PWR_AttrGov gov;
+        PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ_LIMIT_MAX, &upper_lim);
+      }
       return PWR_RET_SUCCESS;
-
     }
     case PWR_REGION_COMMUNICATE: {
         online_cpus(2);
@@ -473,7 +441,18 @@ int PWR_AppHintStart(uint64_t *region_id) {
         return PWR_RET_SUCCESS;
     }
     case PWR_REGION_MEM_BOUND: {
-        //add in here, slow all cores except 1. 
+        // Optimal upper bound on frequency
+        uint64_t optimal_frequency_ub = 2600000;
+        PWR_Grp cores;
+        PWR_ObjGetChildren(socket, &cores); 
+        for (int i = 0; i < PWR_GrpGetNumObjs(cores); i++) {
+          PWR_Obj obj;
+          PWR_GrpGetObjByIndx(cores, i, &obj);
+          PWR_AttrGov gov;
+        //   gov = PWR_GOV_LINUX_SCHEDUTIL;
+        //   PWR_ObjAttrSetValue(obj, PWR_ATTR_GOV, &gov);
+          PWR_ObjAttrSetValue(obj, PWR_ATTR_FREQ_LIMIT_MAX, &optimal_frequency_ub);
+        }
         return PWR_RET_SUCCESS;
     }
     case PWR_REGION_DEFAULT: {
