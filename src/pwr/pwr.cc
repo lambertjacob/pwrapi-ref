@@ -14,6 +14,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unordered_map>
+#include <iostream>
 
 #include "distCntxt.h"
 #include "distObject.h"
@@ -26,6 +27,7 @@
 #include "stat.h"
 #include "status.h"
 #include "sched.h"
+#include "curl/curl.h"
 
 using namespace PowerAPI;
 
@@ -402,6 +404,28 @@ int PWR_AppHintDestroy(uint64_t *region_id) {
   return PWR_RET_SUCCESS;  
 }
 
+const std::string INFLUX_URL = "http://localhost:8086/api/v2/write?org=main&bucket=powerstats&precision=ns";
+const std::string INFLUX_TOKEN = std::getenv("INFLUX_GENERAL_API_TOKEN");
+void sendToInfluxDB(const std::string& data) {
+  CURL *curl = curl_easy_init();
+  if (curl) {
+    struct curl_slist *headers = NULL;
+    headers = curl_slist_append(headers, ("Authorization: Token " + INFLUX_TOKEN).c_str());
+    headers = curl_slist_append(headers, "Content-Type: text/plain");
+
+    curl_easy_setopt(curl, CURLOPT_URL, INFLUX_URL.c_str());
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
+
+    CURLcode res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+      std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
+    }
+    curl_easy_cleanup(curl);
+    curl_slist_free_all(headers);
+  }
+}
+
 
 int PWR_AppHintStart(uint64_t *region_id) { 
   
@@ -420,6 +444,7 @@ int PWR_AppHintStart(uint64_t *region_id) {
       return PWR_RET_SUCCESS;
     }
     case PWR_REGION_COMPUTE: {
+      sendToInfluxDB("compute");
       // Scale all cores to their maximum operating frequency
       uint64_t upper_lim = 3200000;
       PWR_Grp cores;
@@ -441,6 +466,7 @@ int PWR_AppHintStart(uint64_t *region_id) {
       return PWR_RET_SUCCESS;
     }
     case PWR_REGION_MEM_BOUND: {
+      sendToInfluxDB("mem_bound");
       // Optimal upper bound on frequency
       uint64_t optimal_frequency_ub = 2600000;
       PWR_Grp cores;
